@@ -15,7 +15,6 @@ import java.util.List;
 public class UserRepositoryInMemoryImpl implements UserRepository {
     private long userId;
     private final HashMap<Long, User> users = new HashMap<>();
-    private  final  HashMap <Long, String> emails = new HashMap<>();
 
     private long getNextUserId() {
         userId++;
@@ -27,35 +26,33 @@ public class UserRepositoryInMemoryImpl implements UserRepository {
         userId = getNextUserId();
         user.setId(userId);
         users.put(userId, user);
-        emails.put(userId, user.getEmail());
         return user;
 
     }
 
     @Override
-    public User update(User user) {
-        if (user != null) {
-            long updateId = user.getId();
-            if (users.containsKey(updateId)) {
-                users.put(updateId, user);
-                log.info("Обновлен пользователь: {} ", user);
-                return user;
-            } else {
-                userId = getNextUserId();
-                user.setId(userId);
-                users.put(userId, user);
-                log.info("Ранее такого пользователя не было. Добавлен новый пользователь: {} ", user);
+    public User update(Long userId, User user) {
+        long updateId = userId;
+        if (users.containsKey(updateId)) {
+            User userModified = users.get(updateId);
+            if (user.getName()!=null){
+                userModified.setName(user.getName());
             }
-        } else
-            log.error("Ошибка обновления пользователя: {} ", user);
+            if (user.getEmail()!=null){
+                userModified.setEmail(user.getEmail());
+            }
+            users.put(updateId, userModified);
+            log.info("Обновлен пользователь: {} ", user);
+            return userModified;
+        }
         return null;
     }
 
     @Override
-    public void delete(User user) {
-        if (user != null && users.containsKey(user.getId())) {
-            users.remove(user.getId());
-            log.info("Удален пользователь: {} ", user);
+    public void delete(Long userId) {
+        if (users.containsKey(userId)) {
+            users.remove(userId);
+            log.info("Удален пользователь: {} ", userId);
         } else {
             throw new ValidationException("Сработала валидация: Такого пользователя не существует");
         }

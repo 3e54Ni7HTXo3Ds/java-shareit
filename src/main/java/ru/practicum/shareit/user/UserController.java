@@ -29,23 +29,23 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User get(@PathVariable Integer id) {
-        return userService.get(id);
+    public User get(@PathVariable Long id) {
+        return userService.findById(id);
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user) throws CreatingException, IncorrectParameterException, NotFoundParameterException {
+    public User create(@Valid @RequestBody User user) throws CreatingException, IncorrectParameterException {
         return userService.create(user);
     }
 
-    @PatchMapping
-    public User update(@Valid @RequestBody User user) {
-        return userService.update(user);
+    @PatchMapping("/{id}")
+    public User update(@PathVariable("id") Long userId, @Valid @RequestBody User user) throws CreatingException {
+        return userService.update(userId, user);
     }
 
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") int userId) {
+    public void delete(@PathVariable("id") Long userId) {
         userService.delete(userId);
     }
 

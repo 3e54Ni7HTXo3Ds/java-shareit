@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Data
-//@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
@@ -24,25 +23,18 @@ public class UserService {
         return userRepository.findAll();
     }
 
-
-    public User create(User user) throws CreatingException, IncorrectParameterException, NotFoundParameterException {
-
+    public User create(User user) throws CreatingException, IncorrectParameterException {
         if (user != null) {
             String email = user.getEmail();
-            if (email==null|| email.isBlank()){
-                throw new IncorrectParameterException("");
+            if (email == null || email.isBlank()) {
+                throw new IncorrectParameterException("Email не валидный");
             }
-            List<User> filter = userRepository.findAll().stream()
-                    .filter( Objects::nonNull )
-                    .filter(r -> Objects.equals(r.getEmail(), email))
-                    .limit(1)
-                    .collect(Collectors.toList());
-            if (filter.isEmpty()) {
+            if (uniqueEmail(user)) {
                 log.info("Добавлен новый пользователь: {} ", user);
                 return userRepository.create(user);
             } else {
                 log.error("Ошибка создания пользователя: {} ", user);
-                throw new CreatingException("");
+                throw new CreatingException("Такой email уже зарегистрирован");
             }
         } else {
             log.error("Ошибка создания пользователя: {} ", user);
@@ -51,31 +43,40 @@ public class UserService {
     }
 
 
-    public User update(User user) {
+    public User update(Long userId, User user) throws CreatingException {
+        if (user != null) {
+            if (uniqueEmail(user)) {
+                log.info("Обновлен пользователь: {} ", user);
+                return userRepository.update(userId, user);
+            } else {
+                log.error("Ошибка создания пользователя: {} ", user);
+                throw new CreatingException("Такой email уже зарегистрирован");
+            }
+        } else
+            log.error("Ошибка обновления пользователя: {} ", user);
         return null;
     }
 
 
-    public User get(Integer id) {
-        return null;
+    public User findById(Long id) {
+        return userRepository.findById(id);
     }
 
-
-    public void delete(int userId) {
-
+    public void delete(Long userId) {
+        if (userId > 0) {
+            log.info("Удаляем пользователя: {} ", userId);
+            userRepository.delete(userId);
+        } else  log.error("Некорректный ID: {} ", userId);
     }
 
-//    public static void validate(User user) throws IncorrectParameterException, NotFoundParameterException {
-//        String message = null;
-//        List<User> filter;
-//        if (user.getEmail().isBlank() || !user.getEmail().contains("@") || user.getEmail() == null) {
-//            message = "электронная почта не может быть пустой и должна содержать символ @";
-//            log.error(message);
-//            throw new IncorrectParameterException(message);
-//        }   else if (user.getId() < 0) {
-//            message = "некорректный Id";
-//            log.error(message);
-//            throw new NotFoundParameterException(message);
-//        }
-//    }
+    public boolean uniqueEmail(User user) {
+        String email = user.getEmail();
+        List<User> filter = userRepository.findAll().stream()
+                .filter(Objects::nonNull)
+                .filter(r -> Objects.equals(r.getEmail(), email))
+                .limit(1)
+                .collect(Collectors.toList());
+        return filter.isEmpty();
+
+    }
 }
