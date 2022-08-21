@@ -2,14 +2,18 @@ package ru.practicum.shareit.user;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.error.exceptions.CreatingException;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * // TODO .
@@ -22,27 +26,29 @@ import java.util.Collection;
 public class UserController {
 
     private final UserService userService;
+    private final ConversionService conversionService;
 
     @GetMapping
-    public Collection<User> findAll() {
-        return userService.findAll();
+    public Collection<UserDto> findAll() {
+        return userService.findAll().stream()
+                .map(user -> conversionService.convert(user, UserDto.class))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public User get(@PathVariable Long id) {
-        return userService.findById(id);
+    public UserDto get(@PathVariable Long id) {
+        return UserMapper.toUserDto(userService.findById(id));
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user) throws CreatingException, IncorrectParameterException {
-        return userService.create(user);
+    public UserDto create(@Valid @RequestBody UserDto dto) throws CreatingException, IncorrectParameterException {
+        return UserMapper.toUserDto(userService.create(dto));
     }
 
     @PatchMapping("/{id}")
-    public User update(@PathVariable("id") Long userId, @Valid @RequestBody User user) throws CreatingException {
-        return userService.update(userId, user);
+    public UserDto update(@PathVariable("id") Long userId, @Valid @RequestBody UserDto dto) throws CreatingException {
+        return UserMapper.toUserDto(userService.update(userId, dto));
     }
-
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") Long userId) {
