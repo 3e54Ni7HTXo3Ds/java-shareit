@@ -1,8 +1,7 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.Email;
 
@@ -20,6 +19,5 @@ public class User {
     private String email;/* — адрес электронной почты (учтите, что два пользователя не могут
             иметь одинаковый адрес электронной почты).*/
 
-//    public User(Long id, String name, String email) {
-//    }
+
 }

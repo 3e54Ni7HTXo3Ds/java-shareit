@@ -41,8 +41,8 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto create(@Valid @RequestBody UserDto dto) throws CreatingException, IncorrectParameterException {
-        return UserMapper.toUserDto(userService.create(dto));
+    public UserDto create(@Valid @RequestBody UserDto userDto) throws CreatingException, IncorrectParameterException {
+        return UserMapper.toUserDto(userService.create(userDto));
     }
 
     @PatchMapping("/{id}")

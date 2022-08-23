@@ -3,6 +3,8 @@ package ru.practicum.shareit.user;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
+
 @Component
 public class UserMapper implements Converter<User, UserDto>{
 

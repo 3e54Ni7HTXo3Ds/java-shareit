@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.user.model.User;
 
 import javax.validation.ValidationException;
 import java.util.ArrayList;
@@ -27,22 +28,20 @@ public class UserRepositoryInMemoryImpl implements UserRepository {
         user.setId(userId);
         users.put(userId, user);
         return user;
-
     }
 
     @Override
     public User update(Long userId, User user) {
-        long updateId = userId;
-        if (users.containsKey(updateId)) {
-            User userModified = users.get(updateId);
+        if (users.containsKey(userId)) {
+            User userModified = users.get(userId);
             if (user.getName()!=null){
                 userModified.setName(user.getName());
             }
             if (user.getEmail()!=null){
                 userModified.setEmail(user.getEmail());
             }
-            users.put(updateId, userModified);
-            log.info("Обновлен пользователь: {} ", user);
+            users.put(userId, userModified);
+            log.info("Обновлен пользователь: {} ", userModified);
             return userModified;
         }
         return null;
@@ -65,8 +64,8 @@ public class UserRepositoryInMemoryImpl implements UserRepository {
     }
 
     @Override
-    public User findById(Long id) {
-        return users.getOrDefault(id, null);
+    public User findById(Long userId) {
+        return users.getOrDefault(userId, null);
     }
 
 }
