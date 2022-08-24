@@ -33,6 +33,6 @@ public class ItemMapper implements Converter<Item, ItemDto> {
         return new Item(itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
-                itemDto.getRequest() != null ? itemDto.getRequest() : null );
+                itemDto.getRequest() != null ? itemDto.getRequest() : null);
     }
 }
