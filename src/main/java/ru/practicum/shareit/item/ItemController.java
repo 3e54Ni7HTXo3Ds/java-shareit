@@ -12,7 +12,6 @@ import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.UserService;
 
-import javax.validation.Valid;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 @RestController
 @Slf4j
 @Data
-@RequestMapping(path ="/items")
+@RequestMapping(path = "/items")
 @Component
 public class ItemController {
 
@@ -45,11 +44,20 @@ public class ItemController {
         return ItemMapper.toItemDto(itemService.findById(id));
     }
 
+    @GetMapping("/search")
+    public Collection<ItemDto> search(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                      @RequestParam String text) throws AuthException {
+        userService.auth(userId);
+        return itemService.search(text).stream()
+                .map(item -> conversionService.convert(item, ItemDto.class))
+                .collect(Collectors.toList());
+    }
+
     @PostMapping
     public ItemDto create(@RequestBody ItemDto itemDto,
                           @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException, IncorrectParameterException {
         userService.auth(userId);
-        return ItemMapper.toItemDto(itemService.create(userId,itemDto));
+        return ItemMapper.toItemDto(itemService.create(userId, itemDto));
     }
 
     @PatchMapping("/{id}")

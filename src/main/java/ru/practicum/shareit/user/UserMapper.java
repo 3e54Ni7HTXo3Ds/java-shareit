@@ -15,7 +15,6 @@ public class UserMapper implements Converter<User, UserDto>{
                 user.getName(),
                 user.getEmail()
         );
-
     }
 
     public static UserDto toUserDto(User user) {
@@ -23,7 +22,6 @@ public class UserMapper implements Converter<User, UserDto>{
                 user.getId(),
                 user.getName(),
                 user.getEmail()
-
         );
     }
 

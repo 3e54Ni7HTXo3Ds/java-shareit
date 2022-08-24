@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
@@ -21,7 +23,6 @@ public class Item {
     private User owner; //— владелец вещи;
     private  ItemRequest request; /* — если вещь была создана по запросу другого пользователя, то в этом
      * поле будет храниться ссылка на соответствующий запрос.*/
-
 
     public Item(String name, String description, Boolean available, ItemRequest request) {
         this.name = name;

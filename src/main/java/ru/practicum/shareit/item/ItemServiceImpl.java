@@ -9,9 +9,10 @@ import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.model.User;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -51,7 +52,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item update(Long itemId, Long userId, ItemDto itemDto) throws NotFoundParameterException {
-        if (!Objects.equals(userId, findById(itemId).getOwner().getId())){
+        if (!Objects.equals(userId, findById(itemId).getOwner().getId())) {
             throw new NotFoundParameterException("Изменять может только создатель");
         }
         Item item = ItemMapper.toItem(itemDto);
@@ -64,5 +65,11 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.delete(itemId);
     }
 
-
+    @Override
+    public List<Item> search(String text) {
+        if (text == null || text.isBlank()) {
+            return new ArrayList<>();
+        }
+        return itemRepository.search(text.toLowerCase());
+    }
 }

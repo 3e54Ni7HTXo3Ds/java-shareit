@@ -6,6 +6,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface ItemService {
 
@@ -19,5 +20,5 @@ public interface ItemService {
 
     void delete(Long itemId);
 
-
+    List<Item> search(String text);
 }

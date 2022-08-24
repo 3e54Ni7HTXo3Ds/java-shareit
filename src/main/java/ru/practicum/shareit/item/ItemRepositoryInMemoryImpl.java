@@ -2,12 +2,12 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
 import javax.validation.ValidationException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -21,7 +21,6 @@ public class ItemRepositoryInMemoryImpl implements ItemRepository {
         itemId++;
         return itemId;
     }
-
 
     @Override
     public Item create(Item item) {
@@ -72,5 +71,14 @@ public class ItemRepositoryInMemoryImpl implements ItemRepository {
     @Override
     public Item findById(Long itemId) {
         return items.getOrDefault(itemId, null);
+    }
+
+    @Override
+    public List<Item> search(String text) {
+        return items.values().stream()
+                .filter(item -> item.getName().toLowerCase().contains(text) ||
+                        item.getDescription().toLowerCase().contains(text))
+                  .filter(Item::getAvailable)
+                .collect(Collectors.toList());
     }
 }
