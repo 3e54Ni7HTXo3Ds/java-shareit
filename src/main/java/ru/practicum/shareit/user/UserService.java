@@ -80,7 +80,7 @@ public class UserService {
                 .count() == 1;
     }
 
-    public void auth (Long userId) throws AuthException {
+    public void auth(Long userId) throws AuthException {
         if (!userExists(userId)) {
             log.info("Не успешная авторизация пользователя: {} ", userId);
             throw new AuthException("Такого пользователя нет");

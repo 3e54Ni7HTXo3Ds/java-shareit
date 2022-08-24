@@ -34,10 +34,10 @@ public class UserRepositoryInMemoryImpl implements UserRepository {
     public User update(Long userId, User user) {
         if (users.containsKey(userId)) {
             User userModified = users.get(userId);
-            if (user.getName()!=null){
+            if (user.getName() != null) {
                 userModified.setName(user.getName());
             }
-            if (user.getEmail()!=null){
+            if (user.getEmail() != null) {
                 userModified.setEmail(user.getEmail());
             }
             users.put(userId, userModified);

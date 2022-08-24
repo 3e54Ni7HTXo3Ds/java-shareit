@@ -27,6 +27,7 @@ public class ErrorHandler {
     public ErrorResponse handleNotFoundParameterException(final NotFoundParameterException e) {
         return new ErrorResponse(e.getMessage());
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleAuthException(final AuthException e) {

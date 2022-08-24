@@ -6,7 +6,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 @Component
-public class UserMapper implements Converter<User, UserDto>{
+public class UserMapper implements Converter<User, UserDto> {
 
     @Override
     public UserDto convert(User user) {
