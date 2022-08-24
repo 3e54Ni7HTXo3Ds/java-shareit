@@ -16,5 +16,5 @@ public interface ItemRepository {
 
     Item findById(Long itemId);
 
-     List<Item> search(String toLowerCase);
+    List<Item> search(String toLowerCase);
 }
