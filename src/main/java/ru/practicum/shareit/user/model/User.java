@@ -5,9 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.Email;
 
-/**
- * // TODO .
- */
+
 
 @Data
 @AllArgsConstructor

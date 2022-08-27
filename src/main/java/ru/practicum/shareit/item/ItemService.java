@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
+import ru.practicum.shareit.error.exceptions.UpdateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
@@ -10,15 +11,15 @@ import java.util.List;
 
 public interface ItemService {
 
-    Collection<Item> findAll(Long userId);
+    Collection<ItemDto> findAll(Long userId);
 
-    Item findById(Long itemId);
+    Item findById(Long itemId) throws IncorrectParameterException;
 
     Item create(Long userId, ItemDto dto) throws IncorrectParameterException;
 
-    Item update(Long itemId, Long userId, ItemDto dto) throws NotFoundParameterException;
+    Item update(Long itemId, Long userId, ItemDto dto) throws NotFoundParameterException, IncorrectParameterException, UpdateException;
 
     void delete(Long itemId);
 
-    List<Item> search(String text);
+    List<ItemDto> search(String text);
 }

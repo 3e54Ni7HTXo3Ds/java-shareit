@@ -10,11 +10,7 @@ public class UserMapper implements Converter<User, UserDto> {
 
     @Override
     public UserDto convert(User user) {
-        return new UserDto(
-                user.getId(),
-                user.getName(),
-                user.getEmail()
-        );
+        return toUserDto(user);
     }
 
     public static UserDto toUserDto(User user) {

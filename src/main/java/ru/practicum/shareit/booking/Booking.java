@@ -6,9 +6,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
-/**
- * // TODO .
- */
+
 
 @Data
 public class Booking {
@@ -18,6 +16,7 @@ public class Booking {
     private LocalDateTime end; //— дата и время конца бронирования;
     private Item item;// — вещь, которую пользователь бронирует;
     private User booker;// — пользователь, который осуществляет бронирование;
+    private Status status;
 
     public enum Status {
         WAITING,

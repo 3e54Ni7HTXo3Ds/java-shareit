@@ -10,13 +10,7 @@ public class ItemMapper implements Converter<Item, ItemDto> {
 
     @Override
     public ItemDto convert(Item item) {
-        return new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getRequest() != null ? item.getRequest() : null
-        );
+        return toItemDto(item);
     }
 
     public static ItemDto toItemDto(Item item) {
@@ -25,7 +19,7 @@ public class ItemMapper implements Converter<Item, ItemDto> {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequest() != null ? item.getRequest() : null
+                item.getRequestId() != null ? item.getRequestId() : null
         );
     }
 
@@ -33,6 +27,6 @@ public class ItemMapper implements Converter<Item, ItemDto> {
         return new Item(itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
-                itemDto.getRequest() != null ? itemDto.getRequest() : null);
+                itemDto.getRequestId() != null ? itemDto.getRequestId() : null);
     }
 }

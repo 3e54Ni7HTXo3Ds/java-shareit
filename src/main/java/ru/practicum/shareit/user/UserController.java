@@ -2,7 +2,6 @@ package ru.practicum.shareit.user;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.error.exceptions.CreatingException;
@@ -11,30 +10,25 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
-/**
- * // TODO .
- */
+
 @RestController
 @Slf4j
 @Data
-@RequestMapping(path = "/users")
+@RequestMapping("/users")
 @Component
 public class UserController {
 
     private final UserService userService;
-    private final ConversionService conversionService;
+
 
     @GetMapping
     public Collection<UserDto> findAll() {
-        return userService.findAll().stream()
-                .map(user -> conversionService.convert(user, UserDto.class))
-                .collect(Collectors.toList());
+        return userService.findAll();
     }
 
     @GetMapping("/{id}")
-    public UserDto get(@PathVariable Long id) {
+    public UserDto get(@PathVariable Long id) throws IncorrectParameterException {
         return UserMapper.toUserDto(userService.findById(id));
     }
 
