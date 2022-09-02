@@ -1,12 +1,49 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.error.exceptions.CreatingException;
+import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
+import ru.practicum.shareit.user.dto.UserDto;
 
-/**
- * // TODO .
- */
+import javax.validation.Valid;
+import java.util.Collection;
+
+
 @RestController
-@RequestMapping(path = "/users")
+@Slf4j
+@Data
+@RequestMapping("/users")
+@Component
 public class UserController {
+
+    private final UserService userService;
+
+
+    @GetMapping
+    public Collection<UserDto> findAll() {
+        return userService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public UserDto get(@PathVariable Long id) throws IncorrectParameterException {
+        return UserMapper.toUserDto(userService.findById(id));
+    }
+
+    @PostMapping
+    public UserDto create(@Valid @RequestBody UserDto userDto) throws CreatingException, IncorrectParameterException {
+        return UserMapper.toUserDto(userService.create(userDto));
+    }
+
+    @PatchMapping("/{id}")
+    public UserDto update(@PathVariable("id") Long userId, @Valid @RequestBody UserDto dto) throws CreatingException {
+        return UserMapper.toUserDto(userService.update(userId, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable("id") Long userId) {
+        userService.delete(userId);
+    }
 }
