@@ -75,13 +75,13 @@ public class ItemServiceImpl implements ItemService {
         }
         Item itemNew = ItemMapper.toItem(itemDto);
         Item item = findById(itemId);
-        if (itemNew.getDescription()!=null){
+        if (itemNew.getDescription() != null) {
             item.setDescription(itemNew.getDescription());
         }
-        if (itemNew.getName()!=null){
+        if (itemNew.getName() != null) {
             item.setName(itemNew.getName());
         }
-        if (itemNew.getAvailable()!=null){
+        if (itemNew.getAvailable() != null) {
             item.setAvailable(itemNew.getAvailable());
         }
 
@@ -99,9 +99,8 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-//        return itemRepository.search(text.toLowerCase()).stream()
-//                .map(item -> conversionService.convert(item, ItemDto.class))
-//                .collect(Collectors.toList());
-        return new ArrayList<>();
+        return itemRepository.search(text.toLowerCase()).stream()
+                .map(item -> conversionService.convert(item, ItemDto.class))
+                .collect(Collectors.toList());
     }
 }
