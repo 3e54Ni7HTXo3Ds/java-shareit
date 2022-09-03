@@ -5,12 +5,15 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,26 +25,29 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 @AllArgsConstructor
+@Transactional
 public class ItemServiceImpl implements ItemService {
 
-    private ItemRepositoryInMemory itemRepositoryInMemory;
+    private ItemRepository itemRepository;
     private UserService userService;
-
     private final ConversionService conversionService;
 
     @Override
     public Collection<ItemDto> findAll(Long userId) {
-        return itemRepositoryInMemory.findAll(userId).stream()
+        return itemRepository.findAll().stream()
+                .filter(r -> Objects.equals(r.getOwner(), userId))
                 .map(item -> conversionService.convert(item, ItemDto.class))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Item findById(Long itemId) throws IncorrectParameterException {
+    public Item findById(Long itemId) throws IncorrectParameterException, NotFoundParameterException {
         if (itemId > 0) {
-            return itemRepositoryInMemory.findById(itemId);
+            if (itemRepository.findById(itemId).isPresent()) {
+                return itemRepository.findById(itemId).get();
+            }
         } else log.error("Некорректный ID: {} ", itemId);
-        throw new IncorrectParameterException("Некорректный ID");
+        throw new NotFoundParameterException("Некорректный ID");
     }
 
     @Override
@@ -55,26 +61,37 @@ public class ItemServiceImpl implements ItemService {
             log.error("Неверные параметры вещи: {} ", item);
             throw new IncorrectParameterException("Неверные параметры вещи");
         }
-        return itemRepositoryInMemory.create(item);
+        return itemRepository.save(item);
     }
 
     @Override
     public Item update(Long itemId, Long userId, ItemDto itemDto) throws NotFoundParameterException, IncorrectParameterException, UpdateException {
-        if (itemRepositoryInMemory.findById(itemId) == null) {
+        if (!itemRepository.existsById(itemId)) {
             log.error("Вещь не найдена: {} ", itemId);
             throw new UpdateException("Вещь не найдена");
         }
         if (!Objects.equals(userId, findById(itemId).getOwner())) {
             throw new NotFoundParameterException("Изменять может только создатель");
         }
-        Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(userId);
-        return itemRepositoryInMemory.update(itemId, userId, item);
+        Item itemNew = ItemMapper.toItem(itemDto);
+        Item item = findById(itemId);
+        if (itemNew.getDescription()!=null){
+            item.setDescription(itemNew.getDescription());
+        }
+        if (itemNew.getName()!=null){
+            item.setName(itemNew.getName());
+        }
+        if (itemNew.getAvailable()!=null){
+            item.setAvailable(itemNew.getAvailable());
+        }
+
+        log.info("Обновлена вещь: {} ", item);
+        return itemRepository.save(item);
     }
 
     @Override
     public void delete(Long itemId) {
-        itemRepositoryInMemory.delete(itemId);
+        itemRepository.deleteById(itemId);
     }
 
     @Override
@@ -82,8 +99,9 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemRepositoryInMemory.search(text.toLowerCase()).stream()
-                .map(item -> conversionService.convert(item, ItemDto.class))
-                .collect(Collectors.toList());
+//        return itemRepository.search(text.toLowerCase()).stream()
+//                .map(item -> conversionService.convert(item, ItemDto.class))
+//                .collect(Collectors.toList());
+        return new ArrayList<>();
     }
 }

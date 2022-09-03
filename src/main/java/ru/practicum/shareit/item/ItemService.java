@@ -13,7 +13,7 @@ public interface ItemService {
 
     Collection<ItemDto> findAll(Long userId);
 
-    Item findById(Long itemId) throws IncorrectParameterException;
+    Item findById(Long itemId) throws IncorrectParameterException, NotFoundParameterException;
 
     Item create(Long userId, ItemDto dto) throws IncorrectParameterException;
 

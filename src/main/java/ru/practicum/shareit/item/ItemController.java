@@ -29,7 +29,7 @@ public class ItemController {
 
     @GetMapping("/{id}")
     public ItemDto get(@PathVariable Long id,
-                       @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException, IncorrectParameterException {
+                       @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
         return ItemMapper.toItemDto(itemService.findById(id));
     }
