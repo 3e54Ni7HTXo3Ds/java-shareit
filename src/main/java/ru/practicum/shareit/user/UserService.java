@@ -3,19 +3,21 @@ package ru.practicum.shareit.user;
 import ru.practicum.shareit.error.exceptions.AuthException;
 import ru.practicum.shareit.error.exceptions.CreatingException;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
+import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface UserService {
     Collection<UserDto> findAll();
 
-    User findById(Long userId) throws IncorrectParameterException;
+    User findById(Long userId) throws IncorrectParameterException, NotFoundParameterException;
 
     User create(UserDto userDto) throws CreatingException, IncorrectParameterException;
 
-    User update(Long userId, UserDto userDto) throws CreatingException;
+    User update(Long userId, UserDto userDto) throws CreatingException, IncorrectParameterException, NotFoundParameterException;
 
     void delete(Long userId);
 

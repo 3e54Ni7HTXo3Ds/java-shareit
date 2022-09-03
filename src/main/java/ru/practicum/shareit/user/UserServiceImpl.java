@@ -7,11 +7,13 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.error.exceptions.AuthException;
 import ru.practicum.shareit.error.exceptions.CreatingException;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
+import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,11 +32,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(Long userId) throws IncorrectParameterException {
+    public User findById(Long userId) throws IncorrectParameterException, NotFoundParameterException {
         if (userId > 0) {
-            return userRepository.findById(userId);
+            if (userRepository.findById(userId).isPresent()) {
+                return userRepository.findById(userId).get();
+            }
         } else log.error("Некорректный ID: {} ", userId);
-        throw new IncorrectParameterException("Некорректный ID");
+        throw new NotFoundParameterException("Некорректный ID");
     }
 
     @Override
@@ -44,32 +48,39 @@ public class UserServiceImpl implements UserService {
         if (email == null || email.isBlank()) {
             throw new IncorrectParameterException("Email не валидный");
         }
-        if (uniqueEmail(user)) {
-            log.info("Добавлен новый пользователь: {} ", user);
-            return userRepository.create(user);
-        } else {
-            log.error("Ошибка создания пользователя: {} ", user);
-            throw new CreatingException("Такой email уже зарегистрирован");
-        }
+        //   if (uniqueEmail(user)) {
+        log.info("Добавлен новый пользователь: {} ", user);
+        return userRepository.save(user);
+//        } else {
+//            log.error("Ошибка создания пользователя: {} ", user);
+//            throw new CreatingException("Такой email уже зарегистрирован");
+//        }
     }
 
     @Override
-    public User update(Long userId, UserDto userDto) throws CreatingException {
-        User user = UserMapper.toUser(userDto);
-        if (uniqueEmail(user)) {
-            log.info("Обновлен пользователь: {} ", user);
-            return userRepository.update(userId, user);
-        } else {
-            log.error("Ошибка создания пользователя: {} ", user);
-            throw new CreatingException("Такой email уже зарегистрирован");
+    public User update(Long userId, UserDto userDto) throws CreatingException, IncorrectParameterException, NotFoundParameterException {
+        User userNew = UserMapper.toUser(userDto);
+        User user = findById(userId);
+        if (userNew.getEmail()!=null){
+            user.setEmail(userNew.getEmail());
         }
+        if (userNew.getName()!=null){
+            user.setName(userNew.getName());
+        }
+        //     if (uniqueEmail(user)) {
+        log.info("Обновлен пользователь: {} ", user);
+        return userRepository.save(user);
+//        } else {
+//            log.error("Ошибка создания пользователя: {} ", user);
+//            throw new CreatingException("Такой email уже зарегистрирован");
+//        }
     }
 
     @Override
     public void delete(Long userId) {
         if (userId > 0) {
             log.info("Удаляем пользователя: {} ", userId);
-            userRepository.delete(userId);
+            userRepository.deleteById(userId);
         } else log.error("Некорректный ID: {} ", userId);
     }
 

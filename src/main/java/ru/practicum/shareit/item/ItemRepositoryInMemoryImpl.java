@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
-public class ItemRepositoryInMemoryImpl implements ItemRepository {
+public class ItemRepositoryInMemoryImpl implements ItemRepositoryInMemory {
 
     private long itemId;
     private final HashMap<Long, Item> items = new HashMap<>();
@@ -64,7 +64,7 @@ public class ItemRepositoryInMemoryImpl implements ItemRepository {
     public List<Item> findAll(Long userId) {
         log.info("Общее количество вещей: {} ", items.size());
         return items.values().stream()
-                .filter(r -> Objects.equals(r.getOwner().getId(), userId))
+                .filter(r -> Objects.equals(r.getOwner(), userId))
                 .collect(Collectors.toList());
     }
 

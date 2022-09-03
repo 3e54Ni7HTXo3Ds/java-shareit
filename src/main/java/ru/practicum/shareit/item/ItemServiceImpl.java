@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private ItemRepository itemRepository;
+    private ItemRepositoryInMemory itemRepositoryInMemory;
     private UserService userService;
 
     private final ConversionService conversionService;
 
     @Override
     public Collection<ItemDto> findAll(Long userId) {
-        return itemRepository.findAll(userId).stream()
+        return itemRepositoryInMemory.findAll(userId).stream()
                 .map(item -> conversionService.convert(item, ItemDto.class))
                 .collect(Collectors.toList());
     }
@@ -39,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item findById(Long itemId) throws IncorrectParameterException {
         if (itemId > 0) {
-            return itemRepository.findById(itemId);
+            return itemRepositoryInMemory.findById(itemId);
         } else log.error("Некорректный ID: {} ", itemId);
         throw new IncorrectParameterException("Некорректный ID");
     }
@@ -47,7 +47,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item create(Long userId, ItemDto itemDto) throws IncorrectParameterException {
         Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(userService.findById(userId));
+        item.setOwner(userId);
         if (
                 item.getAvailable() == null || item.getName() == null || item.getDescription() == null ||
                         item.getName().isBlank() ||
@@ -55,26 +55,26 @@ public class ItemServiceImpl implements ItemService {
             log.error("Неверные параметры вещи: {} ", item);
             throw new IncorrectParameterException("Неверные параметры вещи");
         }
-        return itemRepository.create(item);
+        return itemRepositoryInMemory.create(item);
     }
 
     @Override
     public Item update(Long itemId, Long userId, ItemDto itemDto) throws NotFoundParameterException, IncorrectParameterException, UpdateException {
-        if (itemRepository.findById(itemId) == null) {
+        if (itemRepositoryInMemory.findById(itemId) == null) {
             log.error("Вещь не найдена: {} ", itemId);
             throw new UpdateException("Вещь не найдена");
         }
-        if (!Objects.equals(userId, findById(itemId).getOwner().getId())) {
+        if (!Objects.equals(userId, findById(itemId).getOwner())) {
             throw new NotFoundParameterException("Изменять может только создатель");
         }
         Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(userService.findById(userId));
-        return itemRepository.update(itemId, userId, item);
+        item.setOwner(userId);
+        return itemRepositoryInMemory.update(itemId, userId, item);
     }
 
     @Override
     public void delete(Long itemId) {
-        itemRepository.delete(itemId);
+        itemRepositoryInMemory.delete(itemId);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemRepository.search(text.toLowerCase()).stream()
+        return itemRepositoryInMemory.search(text.toLowerCase()).stream()
                 .map(item -> conversionService.convert(item, ItemDto.class))
                 .collect(Collectors.toList());
     }

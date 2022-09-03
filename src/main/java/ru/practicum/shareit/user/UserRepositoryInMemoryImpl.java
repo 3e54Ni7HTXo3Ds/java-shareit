@@ -13,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Repository
-public class UserRepositoryInMemoryImpl implements UserRepository {
+public class UserRepositoryInMemoryImpl implements UserRepositoryInMemory {
     private long userId;
     private final HashMap<Long, User> users = new HashMap<>();
 
