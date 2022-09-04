@@ -100,6 +100,7 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         }
         return itemRepository.search(text.toLowerCase()).stream()
+                .filter(r -> Objects.equals(r.getAvailable(), true))
                 .map(item -> conversionService.convert(item, ItemDto.class))
                 .collect(Collectors.toList());
     }
