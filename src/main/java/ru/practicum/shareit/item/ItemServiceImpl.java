@@ -11,9 +11,7 @@ import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,8 +26,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class ItemServiceImpl implements ItemService {
 
-    private ItemRepository itemRepository;
-    private UserService userService;
+    private final ItemRepository itemRepository;
+    private final UserService userService;
     private final ConversionService conversionService;
 
     @Override
@@ -103,5 +101,11 @@ public class ItemServiceImpl implements ItemService {
                 .filter(r -> Objects.equals(r.getAvailable(), true))
                 .map(item -> conversionService.convert(item, ItemDto.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean itemExists(Long itemId) {
+        return itemRepository.findAll().stream()
+                .anyMatch(r -> Objects.equals(r.getId(), itemId));
     }
 }

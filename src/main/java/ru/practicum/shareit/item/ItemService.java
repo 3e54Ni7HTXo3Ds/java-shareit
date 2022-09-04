@@ -22,4 +22,6 @@ public interface ItemService {
     void delete(Long itemId);
 
     List<ItemDto> search(String text);
+
+    Boolean itemExists(Long itemId);
 }
