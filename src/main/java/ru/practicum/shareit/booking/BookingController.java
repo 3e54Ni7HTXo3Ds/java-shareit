@@ -14,6 +14,7 @@ import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.Valid;
+import java.util.List;
 
 
 @RestController
@@ -40,13 +41,27 @@ public class BookingController {
                                      @RequestHeader("X-Sharer-User-Id") Long userId) throws CreatingException,
             AuthException, NotFoundParameterException, IncorrectParameterException, UpdateException {
         userService.auth(userId);
-        return BookingMapper.toBookingResponseDto(bookingService.update(bookingId, userId, approved));
+        return bookingService.update(bookingId, userId, approved);
     }
 
     @GetMapping("/{id}")
-    public BookingResponseDto get(@PathVariable Long bookingId,
-                                  @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException, NotFoundParameterException {
+    public BookingResponseDto getById(@PathVariable("id") Long bookingId,
+                                      @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException, NotFoundParameterException {
         userService.auth(userId);
-        return BookingMapper.toBookingResponseDto(bookingService.findById(bookingId));
+        return bookingService.findById(bookingId, userId);
+    }
+
+    @GetMapping("")
+    public List<BookingResponseDto> getByUser(@RequestParam(required = false, defaultValue = "ALL") String state,
+                                              @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException {
+        userService.auth(userId);
+        return bookingService.getByUser(state, userId);
+    }
+
+    @GetMapping("/owner")
+    public BookingResponseDto getByOwnerUser(@RequestParam(required = false, defaultValue = "ALL") String state,
+                                             @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException {
+        userService.auth(userId);
+        return bookingService.getByOwnerUser(state, userId);
     }
 }

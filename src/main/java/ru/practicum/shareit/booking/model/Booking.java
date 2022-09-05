@@ -30,7 +30,6 @@ public class Booking {
     private Status status;
 
     public Booking( LocalDateTime start, LocalDateTime end, Long itemId, Long booker, Status status) {
-
         this.start=start;
         this.end=end;
         this.itemId=itemId;
@@ -49,4 +48,22 @@ public class Booking {
      APPROVED — бронирование подтверждено владельцем,
      REJECTED — бронирование отклонено владельцем,
      CANCELED — бронирование отменено создателем.*/
+
+    public enum State {
+        ALL,
+        CURRENT,
+        PAST,
+        FUTURE,
+        WAITING,
+        REJECTED
+    }
+/*
+    значения
+    CURRENT(англ . «текущие»),
+    PAST(англ . «завершённые»),
+    FUTURE(англ . «будущие»),
+    WAITING(англ . «ожидающие подтверждения»),
+    REJECTED(англ . «отклонённые»).
+    */
+
 }
