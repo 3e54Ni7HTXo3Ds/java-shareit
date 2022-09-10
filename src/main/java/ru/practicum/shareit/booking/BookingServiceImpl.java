@@ -16,7 +16,6 @@ import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,7 +36,8 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public Booking create(Long userId, BookingDto bookingDto) throws IncorrectParameterException, NotFoundParameterException {
+    public Booking create(Long userId, BookingDto bookingDto) throws IncorrectParameterException,
+            NotFoundParameterException {
         Booking booking = BookingMapper.toBooking(bookingDto);
         LocalDateTime start = booking.getStart();
         LocalDateTime end = booking.getEnd();
@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
             log.error("Неверное время бронирования: {} ", booking);
             throw new IncorrectParameterException("Неверное время бронирования");
         }
-        if (Objects.equals(itemService.findById(booking.getItemId()).getOwner(), booking.getBooker())){
+        if (Objects.equals(itemService.findById(booking.getItemId()).getOwner(), booking.getBooker())) {
             log.error("Владелец не может бронировать: {} ", booking);
             throw new NotFoundParameterException("Владелец не может бронировать");
         }
@@ -64,7 +64,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponseDto update(Long bookingId, Long userId, Boolean approved) throws UpdateException, NotFoundParameterException, IncorrectParameterException {
+    public BookingResponseDto update(Long bookingId, Long userId, Boolean approved) throws UpdateException,
+            NotFoundParameterException, IncorrectParameterException {
         if (!bookingRepository.existsById(bookingId)) {
             log.error("Бронирование не найдено: {} ", bookingId);
             throw new UpdateException("Бронирование не найдено");
@@ -112,7 +113,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Optional<Booking> findById(Long bookingId) throws NotFoundParameterException {
+    public Optional<Booking> findById(Long bookingId) {
         return bookingRepository.findById(bookingId);
     }
 
@@ -127,49 +128,119 @@ public class BookingServiceImpl implements BookingService {
             }
             return list;
         } else if (Booking.State.CURRENT.toString().equals(state)) {
+
+            List<BookingResponseDto> list =
+                    BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
+                                    LocalDateTime.now(), LocalDateTime.now()));
+            for (BookingResponseDto i : list) {
+                ItemDto item = i.getItem();
+                item.setName(itemRepository.findById(item.getId()).get().getName());
+            }
+            return list;
+
         } else if (Booking.State.PAST.toString().equals(state)) {
+            List<BookingResponseDto> list =
+                    BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(userId,
+                                    LocalDateTime.now()));
+            for (BookingResponseDto i : list) {
+                ItemDto item = i.getItem();
+                item.setName(itemRepository.findById(item.getId()).get().getName());
+            }
+            return list;
         } else if (Booking.State.FUTURE.toString().equals(state)) {
             List<BookingResponseDto> list =
-                    BookingMapper.mapToBookingResponseDto(bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                    BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
             for (BookingResponseDto i : list) {
                 ItemDto item = i.getItem();
                 item.setName(itemRepository.findById(item.getId()).get().getName());
             }
             return list;
         } else if (Booking.State.WAITING.toString().equals(state)) {
+            List<BookingResponseDto> list =
+                    BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerAndStatusOrderByStartDesc(
+                                    userId, Booking.Status.valueOf(state)));
+            for (BookingResponseDto i : list) {
+                ItemDto item = i.getItem();
+                item.setName(itemRepository.findById(item.getId()).get().getName());
+            }
+            return list;
         } else if (Booking.State.REJECTED.toString().equals(state)) {
+            List<BookingResponseDto> list =
+                    BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerAndStatusOrderByStartDesc(
+                                    userId, Booking.Status.valueOf(state)));
+            for (BookingResponseDto i : list) {
+                ItemDto item = i.getItem();
+                item.setName(itemRepository.findById(item.getId()).get().getName());
+            }
+            return list;
         } else {
             throw new IncorrectParameterException("Unknown state: UNSUPPORTED_STATUS");
         }
-        return null;
     }
 
     @Override
     public List<BookingResponseDto> getByOwnerUser(String state, Long userId) throws IncorrectParameterException {
         if (Booking.State.ALL.toString().equals(state)) {
             List<BookingResponseDto> list =
-                    BookingMapper.mapToBookingResponseDto(bookingRepository.findByBookerOrderByStartDesc(userId));
+                    BookingMapper.mapToBookingResponseDto(bookingRepository.findAllByOwner(userId));
             for (BookingResponseDto i : list) {
                 ItemDto item = i.getItem();
                 item.setName(itemRepository.findById(item.getId()).get().getName());
             }
             return list;
         } else if (Booking.State.CURRENT.toString().equals(state)) {
+            List<BookingResponseDto> list =
+                    BookingMapper.mapToBookingResponseDto(bookingRepository.findCurrentByOwner(userId,
+                            LocalDateTime.now()));
+            for (BookingResponseDto i : list) {
+                ItemDto item = i.getItem();
+                item.setName(itemRepository.findById(item.getId()).get().getName());
+            }
+            return list;
         } else if (Booking.State.PAST.toString().equals(state)) {
+            List<BookingResponseDto> list =
+                    BookingMapper.mapToBookingResponseDto(bookingRepository.findPastByOwner(userId,
+                            LocalDateTime.now()));
+            for (BookingResponseDto i : list) {
+                ItemDto item = i.getItem();
+                item.setName(itemRepository.findById(item.getId()).get().getName());
+            }
+            return list;
         } else if (Booking.State.FUTURE.toString().equals(state)) {
             List<BookingResponseDto> list =
-                    BookingMapper.mapToBookingResponseDto(bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                    BookingMapper.mapToBookingResponseDto(bookingRepository.findFutureByOwner(userId,
+                            LocalDateTime.now()));
             for (BookingResponseDto i : list) {
                 ItemDto item = i.getItem();
                 item.setName(itemRepository.findById(item.getId()).get().getName());
             }
             return list;
         } else if (Booking.State.WAITING.toString().equals(state)) {
+
+            List<BookingResponseDto> list =
+                    BookingMapper.mapToBookingResponseDto(bookingRepository.findWaitingByOwner(userId));
+            for (BookingResponseDto i : list) {
+                ItemDto item = i.getItem();
+                item.setName(itemRepository.findById(item.getId()).get().getName());
+            }
+            return list;
         } else if (Booking.State.REJECTED.toString().equals(state)) {
+
+            List<BookingResponseDto> list =
+                    BookingMapper.mapToBookingResponseDto(bookingRepository.findRejectedByOwner(userId));
+            for (BookingResponseDto i : list) {
+                ItemDto item = i.getItem();
+                item.setName(itemRepository.findById(item.getId()).get().getName());
+            }
+            return list;
         } else {
             throw new IncorrectParameterException("Unknown state: UNSUPPORTED_STATUS");
         }
-        return null;
     }
 
 

@@ -6,17 +6,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,18 +33,28 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final UserService userService;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
     private final ConversionService conversionService;
 
     @Override
-    public Collection<ItemDto> findAll(Long userId) {
-        return itemRepository.findAll().stream()
+    public Collection<ItemResponseDto> findAll(Long userId) {
+        List<ItemResponseDto> list = itemRepository.findAll().stream()
                 .filter(r -> Objects.equals(r.getOwner(), userId))
-                .map(item -> conversionService.convert(item, ItemDto.class))
+                .sorted(Comparator.comparing(Item::getId))
+                .map(ItemMapper::toItemResponseDto)
                 .collect(Collectors.toList());
+
+        for (ItemResponseDto i : list) {
+            i = addLastNextBooking(i.getId(), userId, i);
+            list.set(list.indexOf(i), i);
+        }
+
+        return list;
     }
 
     @Override
-    public Item findById(Long itemId) throws IncorrectParameterException, NotFoundParameterException {
+    public Item findById(Long itemId) throws NotFoundParameterException {
         if (itemId > 0) {
             if (itemRepository.findById(itemId).isPresent()) {
                 return itemRepository.findById(itemId).get();
@@ -47,6 +62,33 @@ public class ItemServiceImpl implements ItemService {
         } else log.error("Некорректный ID: {} ", itemId);
         throw new NotFoundParameterException("Некорректный ID");
     }
+
+    @Override
+    public ItemResponseDto findByIdDto(Long itemId, Long userId)
+            throws NotFoundParameterException {
+        if (itemId > 0) {
+            if (itemRepository.findById(itemId).isPresent()) {
+                ItemResponseDto itemResponseDto = ItemMapper.toItemResponseDto(itemRepository.findById(itemId).get());
+                itemResponseDto = addLastNextBooking(itemId, userId, itemResponseDto);
+                return itemResponseDto;
+            }
+        } else log.error("Некорректный ID: {} ", itemId);
+        throw new NotFoundParameterException("Некорректный ID");
+    }
+
+    private ItemResponseDto addLastNextBooking(Long itemId, Long userId, ItemResponseDto itemResponseDto) {
+        if (Objects.equals(itemResponseDto.getOwnerId(), userId)) {
+            List<Booking> list = bookingRepository.findByItemIdOrderByStartAsc(itemId);
+            if (list != null && list.size() > 0) {
+                itemResponseDto.setLastBooking(BookingMapper.toBookingDto(list.get(0)));
+            }
+            if (list != null && list.size() > 0 && list.get(1) != null) {
+                itemResponseDto.setNextBooking(BookingMapper.toBookingDto(list.get(1)));
+            }
+        }
+        return itemResponseDto;
+    }
+
 
     @Override
     public Item create(Long userId, ItemDto itemDto) throws IncorrectParameterException {
@@ -63,7 +105,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item update(Long itemId, Long userId, ItemDto itemDto) throws NotFoundParameterException, IncorrectParameterException, UpdateException {
+    public Item update(Long itemId, Long userId, ItemDto itemDto) throws
+            NotFoundParameterException, IncorrectParameterException, UpdateException {
         if (!itemRepository.existsById(itemId)) {
             log.error("Вещь не найдена: {} ", itemId);
             throw new UpdateException("Вещь не найдена");
@@ -107,5 +150,42 @@ public class ItemServiceImpl implements ItemService {
     public Boolean itemExists(Long itemId) {
         return itemRepository.findAll().stream()
                 .anyMatch(r -> Objects.equals(r.getId(), itemId));
+    }
+
+    @Override
+    public CommentResponseDto create(Long userId, Long itemId, CommentDto commentDto)
+            throws IncorrectParameterException, NotFoundParameterException {
+
+        if (commentDto.getText().isBlank()) {
+            log.error("Неверный комментарий: {} ", commentDto);
+            throw new IncorrectParameterException("Неверный комментарий");
+        }
+
+        if (!itemRepository.existsById(itemId)) {
+            log.error("Неверные параметры вещи: {} ", commentDto);
+            throw new IncorrectParameterException("Неверные параметры вещи");
+        }
+        Comment comment = CommentMapper.toComment(commentDto);
+        List<Booking> listOfPastBookings =
+                bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+        boolean ableToComment = false;
+        for (Booking b : listOfPastBookings) {
+            if (Objects.equals(b.getItemId(), itemId) && b.getStatus() != Booking.Status.REJECTED) {
+                ableToComment = true;
+                break;
+            }
+        }
+        if (!ableToComment) {
+            log.error("Данный пользователь не может комментировать эту вещь: {} ", userId);
+            throw new IncorrectParameterException("Данный пользователь не может комментировать эту вещь");
+        }
+
+        comment.setItem(itemId);
+        comment.setAuthor(userId);
+        comment.setCreated(LocalDateTime.now());
+        commentRepository.save(comment);
+        CommentResponseDto responseDto = CommentMapper.toCommentResponseDto(comment);
+        responseDto.setAuthor(userService.findById(userId).getName());
+        return responseDto;
     }
 }

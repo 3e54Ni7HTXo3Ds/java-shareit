@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.error.exceptions.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.user.UserService;
@@ -23,16 +25,16 @@ public class ItemController {
     private final UserService userService;
 
     @GetMapping
-    public Collection<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException {
+    public Collection<ItemResponseDto> findAll(@RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException, NotFoundParameterException, IncorrectParameterException {
         userService.auth(userId);
         return itemService.findAll(userId);
     }
 
     @GetMapping("/{id}")
     public ItemResponseDto get(@PathVariable Long id,
-                                   @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException, IncorrectParameterException, NotFoundParameterException {
+                               @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
-        return ItemMapper.toItemResponseDto(itemService.findById(id));
+        return itemService.findByIdDto(id, userId);
     }
 
     @GetMapping("/search")
@@ -47,6 +49,15 @@ public class ItemController {
                           @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException, IncorrectParameterException {
         userService.auth(userId);
         return ItemMapper.toItemDto(itemService.create(userId, itemDto));
+    }
+
+    @PostMapping("/{id}/comment")
+    public CommentResponseDto create(@RequestBody CommentDto commentDto,
+                                         @PathVariable("id") Long itemId,
+                                         @RequestHeader("X-Sharer-User-Id") Long userId)
+            throws AuthException, IncorrectParameterException, NotFoundParameterException {
+        userService.auth(userId);
+        return itemService.create(userId, itemId, commentDto);
     }
 
     @PatchMapping("/{id}")
