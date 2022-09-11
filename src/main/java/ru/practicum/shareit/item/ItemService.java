@@ -18,11 +18,13 @@ public interface ItemService {
 
     Item findById(Long itemId) throws IncorrectParameterException, NotFoundParameterException;
 
-    ItemResponseDto findByIdDto(Long itemId, Long userId) throws IncorrectParameterException, NotFoundParameterException;
+    ItemResponseDto findByIdDto(Long itemId, Long userId)
+            throws IncorrectParameterException, NotFoundParameterException;
 
     Item create(Long userId, ItemDto dto) throws IncorrectParameterException;
 
-    Item update(Long itemId, Long userId, ItemDto dto) throws NotFoundParameterException, IncorrectParameterException, UpdateException;
+    Item update(Long itemId, Long userId, ItemDto dto)
+            throws NotFoundParameterException, IncorrectParameterException, UpdateException;
 
     void delete(Long itemId);
 

@@ -25,13 +25,14 @@ public class ItemResponseDto {
     @JsonProperty("comments")
     private List<CommentResponseDto> commentResponseDto;
 
-    public ItemResponseDto(Long id, String name, String description, Boolean available, Long ownerId, Long requestId, BookingDto lastBooking,
+    public ItemResponseDto(Long id, String name, String description, Boolean available, Long ownerId, Long requestId,
+                           BookingDto lastBooking,
                            BookingDto nextBooking, List<CommentResponseDto> commentResponseDto) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;
-        this.ownerId=ownerId;
+        this.ownerId = ownerId;
         this.requestId = requestId;
         this.lastBooking = lastBooking;
         this.nextBooking = nextBooking;

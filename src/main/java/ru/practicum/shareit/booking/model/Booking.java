@@ -29,12 +29,12 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    public Booking( LocalDateTime start, LocalDateTime end, Long itemId, Long booker, Status status) {
-        this.start=start;
-        this.end=end;
-        this.itemId=itemId;
-        this.booker=booker;
-        this.status=status;
+    public Booking(LocalDateTime start, LocalDateTime end, Long itemId, Long booker, Status status) {
+        this.start = start;
+        this.end = end;
+        this.itemId = itemId;
+        this.booker = booker;
+        this.status = status;
     }
 
     public enum Status {

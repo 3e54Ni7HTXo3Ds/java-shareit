@@ -15,10 +15,10 @@ import javax.validation.constraints.Email;
 public class User {
 
     @Id
-    @Column(name="user_id")
+    @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // — уникальный идентификатор пользователя;
-    @Column(name="user_name")
+    @Column(name = "user_name")
     private String name;// — имя или логин пользователя;
     @Email
     private String email;/* — адрес электронной почты (учтите, что два пользователя не могут

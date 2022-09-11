@@ -27,6 +27,6 @@ public class Comment {
     LocalDateTime created;// дата создания комментария
 
     public Comment(String text) {
-        this.text=text;
+        this.text = text;
     }
 }

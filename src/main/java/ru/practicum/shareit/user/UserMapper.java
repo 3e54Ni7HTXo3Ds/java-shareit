@@ -13,6 +13,7 @@ public class UserMapper implements Converter<User, UserDto> {
     public UserDto convert(@NonNull User user) {
         return toUserDto(user);
     }
+
     public static UserDto toUserDto(User user) {
         return new UserDto(
                 user.getId(),

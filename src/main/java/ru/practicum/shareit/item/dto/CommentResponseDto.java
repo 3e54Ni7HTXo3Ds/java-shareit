@@ -22,7 +22,6 @@ public class CommentResponseDto {
     private UserResponseDto userResponseDto;
     private LocalDateTime created;// дата создания комментария
 
-
     @Getter
     @Setter
     @NoArgsConstructor
