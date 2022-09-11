@@ -54,13 +54,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User update(Long userId, UserDto userDto) throws CreatingException, IncorrectParameterException, NotFoundParameterException {
+    public User update(Long userId, UserDto userDto)
+            throws CreatingException, IncorrectParameterException, NotFoundParameterException {
         User userNew = UserMapper.toUser(userDto);
         User user = findById(userId);
-        if (userNew.getEmail()!=null){
+        if (userNew.getEmail() != null) {
             user.setEmail(userNew.getEmail());
         }
-        if (userNew.getName()!=null){
+        if (userNew.getName() != null) {
             user.setName(userNew.getName());
         }
         log.info("Обновлен пользователь: {} ", user);
