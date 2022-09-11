@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -32,8 +31,6 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final ItemService itemService;
-    private final ConversionService conversionService;
-
 
     @Override
     public Booking create(Long userId, BookingDto bookingDto) throws IncorrectParameterException,
@@ -107,7 +104,6 @@ public class BookingServiceImpl implements BookingService {
             BookingResponseDto responseDto = BookingMapper.toBookingResponseDto(booking);
             responseDto.getItem().setName(item.getName());
             return responseDto;
-
         } else log.error("Некорректный ID: {} ", bookingId);
         throw new NotFoundParameterException("Некорректный ID");
     }
@@ -122,10 +118,7 @@ public class BookingServiceImpl implements BookingService {
         if (Booking.State.ALL.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findByBookerOrderByStartDesc(userId));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else if (Booking.State.CURRENT.toString().equals(state)) {
 
@@ -133,10 +126,7 @@ public class BookingServiceImpl implements BookingService {
                     BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
                                     LocalDateTime.now(), LocalDateTime.now()));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
 
         } else if (Booking.State.PAST.toString().equals(state)) {
@@ -144,39 +134,27 @@ public class BookingServiceImpl implements BookingService {
                     BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(userId,
                                     LocalDateTime.now()));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else if (Booking.State.FUTURE.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else if (Booking.State.WAITING.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerAndStatusOrderByStartDesc(
                                     userId, Booking.Status.valueOf(state)));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else if (Booking.State.REJECTED.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerAndStatusOrderByStartDesc(
                                     userId, Booking.Status.valueOf(state)));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else {
             throw new IncorrectParameterException("Unknown state: UNSUPPORTED_STATUS");
@@ -188,60 +166,47 @@ public class BookingServiceImpl implements BookingService {
         if (Booking.State.ALL.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findAllByOwner(userId));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else if (Booking.State.CURRENT.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findCurrentByOwner(userId,
                             LocalDateTime.now()));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else if (Booking.State.PAST.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findPastByOwner(userId,
                             LocalDateTime.now()));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else if (Booking.State.FUTURE.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findFutureByOwner(userId,
                             LocalDateTime.now()));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else if (Booking.State.WAITING.toString().equals(state)) {
 
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findWaitingByOwner(userId));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else if (Booking.State.REJECTED.toString().equals(state)) {
 
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findRejectedByOwner(userId));
-            for (BookingResponseDto i : list) {
-                ItemDto item = i.getItem();
-                item.setName(itemRepository.findById(item.getId()).get().getName());
-            }
+            addItemName(list);
             return list;
         } else {
             throw new IncorrectParameterException("Unknown state: UNSUPPORTED_STATUS");
         }
     }
 
-
+    private void addItemName(List<BookingResponseDto> list) {
+        for (BookingResponseDto i : list) {
+            ItemDto item = i.getItem();
+            item.setName(itemRepository.findById(item.getId()).get().getName());
+        }
+    }
 }

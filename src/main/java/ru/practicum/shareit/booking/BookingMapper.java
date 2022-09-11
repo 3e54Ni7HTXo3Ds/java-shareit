@@ -19,13 +19,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingMapper implements Converter<Booking, BookingDto> {
 
-  //  private final ItemRepository itemRepository;
-
     @Override
     public BookingDto convert(@NonNull Booking booking) {
         return toBookingDto(booking);
     }
-
 
     public static BookingDto toBookingDto(Booking booking) {
         return new BookingDto(
@@ -39,12 +36,10 @@ public class BookingMapper implements Converter<Booking, BookingDto> {
     }
 
     public static BookingResponseDto toBookingResponseDto(Booking booking) {
-
         UserDto responseBooker = new UserDto();
         responseBooker.setId(booking.getBooker());
         ItemDto responseItem = new ItemDto();
         responseItem.setId(booking.getItemId());
-       // responseItem.setName(itemRepository.findById(booking.getItemId()).get().getName());
 
         String startDate = DateTimeFormatter
                 .ofPattern("yyyy-MM-dd'T'HH:mm:ss")

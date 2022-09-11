@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(Long userId) throws IncorrectParameterException, NotFoundParameterException {
+    public User findById(Long userId) throws NotFoundParameterException {
         if (userId > 0) {
             if (userRepository.findById(userId).isPresent()) {
                 return userRepository.findById(userId).get();
@@ -49,13 +49,8 @@ public class UserServiceImpl implements UserService {
         if (email == null || email.isBlank()) {
             throw new IncorrectParameterException("Email не валидный");
         }
-        //   if (uniqueEmail(user)) {
         log.info("Добавлен новый пользователь: {} ", user);
         return userRepository.save(user);
-//        } else {
-//            log.error("Ошибка создания пользователя: {} ", user);
-//            throw new CreatingException("Такой email уже зарегистрирован");
-//        }
     }
 
     @Override
@@ -68,13 +63,8 @@ public class UserServiceImpl implements UserService {
         if (userNew.getName()!=null){
             user.setName(userNew.getName());
         }
-        //     if (uniqueEmail(user)) {
         log.info("Обновлен пользователь: {} ", user);
         return userRepository.save(user);
-//        } else {
-//            log.error("Ошибка создания пользователя: {} ", user);
-//            throw new CreatingException("Такой email уже зарегистрирован");
-//        }
     }
 
     @Override

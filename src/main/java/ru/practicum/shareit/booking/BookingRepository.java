@@ -9,7 +9,6 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-
     List<Booking> findByBookerOrderByStartDesc(Long bookerId);
 
     List<Booking> findByBookerAndStartIsAfterOrderByStartDesc(Long bookerId, LocalDateTime now);
@@ -22,7 +21,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                                                             LocalDateTime now1);
 
     List<Booking> findByBookerAndEndIsBeforeOrderByStartDesc(Long bookerId, LocalDateTime now);
-
 
     @Query(" select b from Booking b " +
             "join Item i on b.itemId=i.id " +

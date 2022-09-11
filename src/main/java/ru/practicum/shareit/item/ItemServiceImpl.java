@@ -12,7 +12,10 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto1;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
@@ -41,12 +44,10 @@ public class ItemServiceImpl implements ItemService {
                 .sorted(Comparator.comparing(Item::getId))
                 .map(ItemMapper::toItemResponseDto)
                 .collect(Collectors.toList());
-
         for (ItemResponseDto i : list) {
             i = addLastNextBooking(i.getId(), userId, i);
             list.set(list.indexOf(i), i);
         }
-
         return list;
     }
 
@@ -78,7 +79,6 @@ public class ItemServiceImpl implements ItemService {
                     }
                 }
                 itemResponseDto.setCommentResponseDto((commentResponseDtos));
-
                 return itemResponseDto;
             }
         } else log.error("Некорректный ID: {} ", itemId);
@@ -97,7 +97,6 @@ public class ItemServiceImpl implements ItemService {
         }
         return itemResponseDto;
     }
-
 
     @Override
     public Item create(Long userId, ItemDto itemDto) throws IncorrectParameterException {
@@ -162,7 +161,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public CommentResponseDto create(Long userId, Long itemId, CommentDto commentDto)
+    public CommentResponseDto1 create(Long userId, Long itemId, CommentDto commentDto)
             throws IncorrectParameterException, NotFoundParameterException {
 
         if (commentDto.getText().isBlank()) {
@@ -188,12 +187,11 @@ public class ItemServiceImpl implements ItemService {
             log.error("Данный пользователь не может комментировать эту вещь: {} ", userId);
             throw new IncorrectParameterException("Данный пользователь не может комментировать эту вещь");
         }
-
         comment.setItem(itemId);
         comment.setAuthor(userId);
         comment.setCreated(LocalDateTime.now());
         commentRepository.save(comment);
-        CommentResponseDto responseDto = CommentMapper.toCommentResponseDto(comment);
+        CommentResponseDto1 responseDto = CommentMapper.toCommentResponseDto1(comment);
         responseDto.setAuthor(userService.findById(userId).getName());
         return responseDto;
     }

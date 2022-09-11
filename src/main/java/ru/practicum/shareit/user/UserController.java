@@ -22,7 +22,6 @@ public class UserController {
 
     private final UserService userService;
 
-
     @GetMapping
     public Collection<UserDto> findAll() {
         return userService.findAll();
