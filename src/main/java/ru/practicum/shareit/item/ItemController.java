@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.error.exceptions.*;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto1;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.user.UserService;
@@ -52,9 +52,9 @@ public class ItemController {
     }
 
     @PostMapping("/{id}/comment")
-    public CommentResponseDto1 create(@RequestBody CommentDto commentDto,
-                                      @PathVariable("id") Long itemId,
-                                      @RequestHeader("X-Sharer-User-Id") Long userId)
+    public CommentResponseDto create(@RequestBody CommentDto commentDto,
+                                     @PathVariable("id") Long itemId,
+                                     @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
         return itemService.create(userId, itemId, commentDto);

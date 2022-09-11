@@ -13,7 +13,7 @@ import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto1;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
@@ -69,10 +69,10 @@ public class ItemServiceImpl implements ItemService {
                 ItemResponseDto itemResponseDto = ItemMapper.toItemResponseDto(itemRepository.findById(itemId).get());
                 itemResponseDto = addLastNextBooking(itemId, userId, itemResponseDto);
                 List<Comment> comments = commentRepository.findByItem(itemId);
-                List<CommentResponseDto1> commentResponseDtos =
-                        CommentMapper.mapToCommentResponseDto1(comments);
+                List<CommentResponseDto> commentResponseDtos =
+                        CommentMapper.mapToCommentResponseDto(comments);
                 if (commentResponseDtos.size() > 0) {
-                    for (CommentResponseDto1 c : commentResponseDtos) {
+                    for (CommentResponseDto c : commentResponseDtos) {
                         String authorName = userService.findById(c.getUserResponseDto().getId()).getName();
                         c.getUserResponseDto().setAuthorName(authorName);
                         c.setAuthor(authorName);
@@ -161,7 +161,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public CommentResponseDto1 create(Long userId, Long itemId, CommentDto commentDto)
+    public CommentResponseDto create(Long userId, Long itemId, CommentDto commentDto)
             throws IncorrectParameterException, NotFoundParameterException {
 
         if (commentDto.getText().isBlank()) {
@@ -191,7 +191,7 @@ public class ItemServiceImpl implements ItemService {
         comment.setAuthor(userId);
         comment.setCreated(LocalDateTime.now());
         commentRepository.save(comment);
-        CommentResponseDto1 responseDto = CommentMapper.toCommentResponseDto1(comment);
+        CommentResponseDto responseDto = CommentMapper.toCommentResponseDto(comment);
         responseDto.setAuthor(userService.findById(userId).getName());
         return responseDto;
     }

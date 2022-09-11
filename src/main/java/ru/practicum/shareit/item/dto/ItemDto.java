@@ -28,5 +28,4 @@ public class ItemDto {
         this.available = available;
         this.requestId = requestId;
     }
-
 }

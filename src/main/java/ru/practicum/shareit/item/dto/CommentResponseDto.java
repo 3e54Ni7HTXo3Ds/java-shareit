@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CommentResponseDto1 {
+public class CommentResponseDto {
 
     private Long id;// уникальный идентификатор комментария;
     private String text;// содержимое комментария;
