@@ -12,10 +12,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
@@ -65,11 +62,23 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponseDto findByIdDto(Long itemId, Long userId)
-            throws NotFoundParameterException {
+            throws NotFoundParameterException, IncorrectParameterException {
         if (itemId > 0) {
             if (itemRepository.findById(itemId).isPresent()) {
                 ItemResponseDto itemResponseDto = ItemMapper.toItemResponseDto(itemRepository.findById(itemId).get());
                 itemResponseDto = addLastNextBooking(itemId, userId, itemResponseDto);
+                List<Comment> comments = commentRepository.findByItem(itemId);
+                List<CommentResponseDto1> commentResponseDtos =
+                        CommentMapper.mapToCommentResponseDto1(comments);
+                if (commentResponseDtos.size() > 0) {
+                    for (CommentResponseDto1 c : commentResponseDtos) {
+                        String authorName = userService.findById(c.getUserResponseDto().getId()).getName();
+                        c.getUserResponseDto().setAuthorName(authorName);
+                        c.setAuthor(authorName);
+                    }
+                }
+                itemResponseDto.setCommentResponseDto((commentResponseDtos));
+
                 return itemResponseDto;
             }
         } else log.error("Некорректный ID: {} ", itemId);
@@ -82,7 +91,7 @@ public class ItemServiceImpl implements ItemService {
             if (list != null && list.size() > 0) {
                 itemResponseDto.setLastBooking(BookingMapper.toBookingDto(list.get(0)));
             }
-            if (list != null && list.size() > 0 && list.get(1) != null) {
+            if (list != null && list.size() > 1 && list.get(1) != null) {
                 itemResponseDto.setNextBooking(BookingMapper.toBookingDto(list.get(1)));
             }
         }

@@ -23,10 +23,10 @@ public class ItemResponseDto {
     private BookingDto lastBooking;
     private BookingDto nextBooking;
     @JsonProperty("comments")
-    private List<CommentResponseDto> commentResponseDto;
+    private List<CommentResponseDto1> commentResponseDto;
 
     public ItemResponseDto(Long id, String name, String description, Boolean available, Long ownerId, Long requestId, BookingDto lastBooking,
-                           BookingDto nextBooking, List<CommentResponseDto> commentResponseDto) {
+                           BookingDto nextBooking, List<CommentResponseDto1> commentResponseDto) {
         this.id = id;
         this.name = name;
         this.description = description;
