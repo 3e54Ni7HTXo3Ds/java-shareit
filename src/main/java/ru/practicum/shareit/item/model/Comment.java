@@ -16,15 +16,15 @@ public class Comment {
     @Id
     @Column(name = "comment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;// уникальный идентификатор комментария;
+    private Long id;// уникальный идентификатор комментария;
     @Column(name = "comment_text")
-    String text;// содержимое комментария;
+    private String text;// содержимое комментария;
     @Column(name = "item_id")
-    Long item;// вещь, к которой относится комментарий;
+    private Long item;// вещь, к которой относится комментарий;
     @Column(name = "author_id")
-    Long author;// автор комментария;
+    private Long author;// автор комментария;
     @Transient
-    LocalDateTime created;// дата создания комментария
+    private LocalDateTime created;// дата создания комментария
 
     public Comment(String text) {
         this.text = text;

@@ -19,6 +19,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingMapper implements Converter<Booking, BookingDto> {
 
+    public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+            .withZone(ZoneOffset.UTC);
+
     @Override
     public BookingDto convert(@NonNull Booking booking) {
         return toBookingDto(booking);
@@ -41,15 +45,9 @@ public class BookingMapper implements Converter<Booking, BookingDto> {
         ItemDto responseItem = new ItemDto();
         responseItem.setId(booking.getItemId());
 
-        String startDate = DateTimeFormatter
-                .ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-                .withZone(ZoneOffset.UTC)
-                .format(booking.getStart());
+        String startDate = dateTimeFormatter.format(booking.getStart());
 
-        String endDate = DateTimeFormatter
-                .ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-                .withZone(ZoneOffset.UTC)
-                .format(booking.getEnd());
+        String endDate = dateTimeFormatter.format(booking.getEnd());
 
         return new BookingResponseDto(
                 booking.getId(),

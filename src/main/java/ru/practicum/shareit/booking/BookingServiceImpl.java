@@ -40,12 +40,15 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime end = booking.getEnd();
         booking.setBooker(userId);
         booking.setStatus(Booking.Status.WAITING);
-        if (booking.getItemId() == null || booking.getStart() == null || booking.getEnd() == null ||
+        Long itemId = booking.getItemId();
+
+        if ( itemId== null || booking.getStart() == null || booking.getEnd() == null ||
                 !itemService.itemExists(booking.getItemId())) {
             log.error("Неверные параметры бронирования: {} ", booking);
             throw new NotFoundParameterException("Неверные параметры бронирования");
         }
-        if (!itemService.findById(booking.getItemId()).getAvailable()) {
+        Item item = itemService.findById(itemId);
+        if (!item.getAvailable()) {
             log.error("Вещь недоступна для бронирования: {} ", booking);
             throw new IncorrectParameterException("Вещь недоступна для бронирования");
         }
@@ -53,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
             log.error("Неверное время бронирования: {} ", booking);
             throw new IncorrectParameterException("Неверное время бронирования");
         }
-        if (Objects.equals(itemService.findById(booking.getItemId()).getOwner(), booking.getBooker())) {
+        if (Objects.equals(item.getOwner(), booking.getBooker())) {
             log.error("Владелец не может бронировать: {} ", booking);
             throw new NotFoundParameterException("Владелец не может бронировать");
         }
