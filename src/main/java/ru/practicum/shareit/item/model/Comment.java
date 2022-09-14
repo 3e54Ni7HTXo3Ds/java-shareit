@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -19,10 +20,12 @@ public class Comment {
     private Long id;// уникальный идентификатор комментария;
     @Column(name = "comment_text")
     private String text;// содержимое комментария;
-    @Column(name = "item_id")
-    private Long item;// вещь, к которой относится комментарий;
-    @Column(name = "author_id")
-    private Long author;// автор комментария;
+    @ManyToOne
+    @JoinColumn(name = "item_id")
+    private Item item;// вещь, к которой относится комментарий;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private User author;// автор комментария;
     @Transient
     private LocalDateTime created;// дата создания комментария
 

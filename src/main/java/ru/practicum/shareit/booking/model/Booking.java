@@ -24,19 +24,12 @@ public class Booking {
     private LocalDateTime start;// — дата и время начала бронирования;
     @Column(name = "end_date")
     private LocalDateTime end; //— дата и время конца бронирования;
-
     @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
-
     @ManyToOne
     @JoinColumn(name = "booker_id")
     private User booker;
-
-    //    @Column(name = "item_id")
-//    private Long itemId;// — вещь, которую пользователь бронирует;
-//    @Column(name = "booker_id")
-//    private Long booker;// — пользователь, который осуществляет бронирование;
     @Enumerated(EnumType.STRING)
     private Status status;
 

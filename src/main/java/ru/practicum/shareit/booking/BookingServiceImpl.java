@@ -19,6 +19,7 @@ import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -73,7 +74,7 @@ public class BookingServiceImpl implements BookingService {
             log.error("Бронирование не найдено: {} ", bookingId);
             throw new UpdateException("Бронирование не найдено");
         }
-        Item item = itemService.findById(findById(bookingId).get().getItem().getId());
+        Item item = findById(bookingId).get().getItem();
         if (!Objects.equals(userId, item.getOwner())) {
             log.error("Подтверждать может только создатель: {} ", bookingId);
             throw new NotFoundParameterException("Подтверждать может только создатель");
@@ -122,54 +123,45 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getByUser(String state, Long userId)
             throws IncorrectParameterException, NotFoundParameterException {
-
         User user = userService.findById(userId);
-        if (Booking.State.ALL.toString().equals(state)) {
-            List<BookingResponseDto> list =
-                    BookingMapper.mapToBookingResponseDto(
+        List<BookingResponseDto> list = null;
+        try {
+            Booking.State var = Booking.State.valueOf(state);
+
+
+            switch (var) {
+                case ALL:
+                    list = BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerOrderByStartDesc(user));
-            addItemName(list);
-            return list;
-        } else if (Booking.State.CURRENT.toString().equals(state)) {
-
-            List<BookingResponseDto> list =
-                    BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(user,
-                                    LocalDateTime.now(), LocalDateTime.now()));
-            addItemName(list);
-            return list;
-
-        } else if (Booking.State.PAST.toString().equals(state)) {
-            List<BookingResponseDto> list =
-                    BookingMapper.mapToBookingResponseDto(
+                    break;
+                case CURRENT:
+                    list =
+                            BookingMapper.mapToBookingResponseDto(
+                                    bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(user,
+                                            LocalDateTime.now(), LocalDateTime.now()));
+                    break;
+                case PAST:
+                    list = BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user,
                                     LocalDateTime.now()));
-            addItemName(list);
-            return list;
-        } else if (Booking.State.FUTURE.toString().equals(state)) {
-            List<BookingResponseDto> list =
-                    BookingMapper.mapToBookingResponseDto(
+                    break;
+                case FUTURE:
+                    list = BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(user,
                                     LocalDateTime.now()));
-            addItemName(list);
-            return list;
-        } else if (Booking.State.WAITING.toString().equals(state)) {
-            List<BookingResponseDto> list =
-                    BookingMapper.mapToBookingResponseDto(
+                    break;
+                case WAITING:
+                case REJECTED:
+                    list = BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerAndStatusOrderByStartDesc(
                                     user, Booking.Status.valueOf(state)));
-            addItemName(list);
-            return list;
-        } else if (Booking.State.REJECTED.toString().equals(state)) {
-            List<BookingResponseDto> list =
-                    BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndStatusOrderByStartDesc(
-                                    user, Booking.Status.valueOf(state)));
-            addItemName(list);
-            return list;
-        } else {
-            throw new IncorrectParameterException("Unknown state: UNSUPPORTED_STATUS");
+                    break;
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IncorrectParameterException("Unknown state: " + state);
         }
+        addItemName(list);
+        return list;
     }
 
     @Override

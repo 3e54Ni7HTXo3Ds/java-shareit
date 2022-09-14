@@ -19,6 +19,7 @@ import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -63,21 +64,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponseDto findByIdDto(Long itemId, Long userId)
-            throws NotFoundParameterException, IncorrectParameterException {
+            throws NotFoundParameterException {
         if (itemId > 0) {
             if (itemRepository.findById(itemId).isPresent()) {
                 ItemResponseDto itemResponseDto = ItemMapper.toItemResponseDto(itemRepository.findById(itemId).get());
                 itemResponseDto = addLastNextBooking(itemId, userId, itemResponseDto);
-                List<Comment> comments = commentRepository.findByItem(itemId);
+                List<Comment> comments = commentRepository.findByItem(findById(itemId));
                 List<CommentResponseDto> commentResponseDtos =
                         CommentMapper.mapToCommentResponseDto(comments);
-                if (commentResponseDtos.size() > 0) {
-                    for (CommentResponseDto c : commentResponseDtos) {
-                        String authorName = userService.findById(c.getUserResponseDto().getId()).getName();
-                        c.getUserResponseDto().setAuthorName(authorName);
-                        c.setAuthor(authorName);
-                    }
-                }
                 itemResponseDto.setCommentResponseDto((commentResponseDtos));
                 return itemResponseDto;
             }
@@ -173,9 +167,11 @@ public class ItemServiceImpl implements ItemService {
             log.error("Неверные параметры вещи: {} ", commentDto);
             throw new IncorrectParameterException("Неверные параметры вещи");
         }
+        Item item = findById(itemId);
+        User user = userService.findById(userId);
         Comment comment = CommentMapper.toComment(commentDto);
         List<Booking> listOfPastBookings =
-                bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(userService.findById(userId),
+                bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user,
                         LocalDateTime.now());
         boolean ableToComment = false;
         for (Booking b : listOfPastBookings) {
@@ -188,12 +184,10 @@ public class ItemServiceImpl implements ItemService {
             log.error("Данный пользователь не может комментировать эту вещь: {} ", userId);
             throw new IncorrectParameterException("Данный пользователь не может комментировать эту вещь");
         }
-        comment.setItem(itemId);
-        comment.setAuthor(userId);
+        comment.setItem(item);
+        comment.setAuthor(user);
         comment.setCreated(LocalDateTime.now());
         commentRepository.save(comment);
-        CommentResponseDto responseDto = CommentMapper.toCommentResponseDto(comment);
-        responseDto.setAuthor(userService.findById(userId).getName());
-        return responseDto;
+        return CommentMapper.toCommentResponseDto(comment);
     }
 }
