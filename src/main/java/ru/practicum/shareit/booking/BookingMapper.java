@@ -8,7 +8,9 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -33,17 +35,17 @@ public class BookingMapper implements Converter<Booking, BookingDto> {
                 booking.getId(),
                 booking.getStart(),
                 booking.getEnd(),
-                booking.getItemId(),
-                booking.getBooker(),
+                booking.getItem().getId(),
+                booking.getBooker().getId(),
                 booking.getStatus()
         );
     }
 
     public static BookingResponseDto toBookingResponseDto(Booking booking) {
         UserDto responseBooker = new UserDto();
-        responseBooker.setId(booking.getBooker());
+        responseBooker.setId(booking.getBooker().getId());
         ItemDto responseItem = new ItemDto();
-        responseItem.setId(booking.getItemId());
+        responseItem.setId(booking.getItem().getId());
 
         String startDate = dateTimeFormatter.format(booking.getStart());
 
@@ -60,13 +62,17 @@ public class BookingMapper implements Converter<Booking, BookingDto> {
     }
 
     public static Booking toBooking(BookingDto bookingDto) {
-        return new Booking(
+        Booking booking = new Booking(
                 bookingDto.getStart(),
                 bookingDto.getEnd(),
-                bookingDto.getItemId(),
-                bookingDto.getBookerId(),
+                new Item(),
+                new User(),
                 bookingDto.getStatus()
         );
+        booking.getItem().setId(bookingDto.getItemId());
+        booking.getBooker().setId(bookingDto.getBookerId());
+
+        return booking;
     }
 
     public static List<BookingResponseDto> mapToBookingResponseDto(Iterable<Booking> bookings) {

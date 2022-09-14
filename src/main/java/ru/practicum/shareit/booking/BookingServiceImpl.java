@@ -15,6 +15,8 @@ import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +33,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final ItemService itemService;
+    private final UserService userService;
 
     @Override
     public Booking create(Long userId, BookingDto bookingDto) throws IncorrectParameterException,
@@ -38,12 +41,12 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = BookingMapper.toBooking(bookingDto);
         LocalDateTime start = booking.getStart();
         LocalDateTime end = booking.getEnd();
-        booking.setBooker(userId);
+        booking.setBooker(userService.findById(userId));
         booking.setStatus(Booking.Status.WAITING);
-        Long itemId = booking.getItemId();
+        Long itemId = booking.getItem().getId();
 
-        if ( itemId== null || booking.getStart() == null || booking.getEnd() == null ||
-                !itemService.itemExists(booking.getItemId())) {
+        if (itemId == null || booking.getStart() == null || booking.getEnd() == null ||
+                !itemService.itemExists(booking.getItem().getId())) {
             log.error("Неверные параметры бронирования: {} ", booking);
             throw new NotFoundParameterException("Неверные параметры бронирования");
         }
@@ -56,7 +59,7 @@ public class BookingServiceImpl implements BookingService {
             log.error("Неверное время бронирования: {} ", booking);
             throw new IncorrectParameterException("Неверное время бронирования");
         }
-        if (Objects.equals(item.getOwner(), booking.getBooker())) {
+        if (Objects.equals(item.getOwner(), booking.getBooker().getId())) {
             log.error("Владелец не может бронировать: {} ", booking);
             throw new NotFoundParameterException("Владелец не может бронировать");
         }
@@ -70,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
             log.error("Бронирование не найдено: {} ", bookingId);
             throw new UpdateException("Бронирование не найдено");
         }
-        Item item = itemService.findById(findById(bookingId).get().getItemId());
+        Item item = itemService.findById(findById(bookingId).get().getItem().getId());
         if (!Objects.equals(userId, item.getOwner())) {
             log.error("Подтверждать может только создатель: {} ", bookingId);
             throw new NotFoundParameterException("Подтверждать может только создатель");
@@ -95,8 +98,8 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponseDto findById(Long bookingId, Long userId) throws NotFoundParameterException {
         if (bookingId > 0 && bookingRepository.findById(bookingId).isPresent()) {
             Booking booking = bookingRepository.findById(bookingId).get();
-            Item item = itemRepository.findById(booking.getItemId()).get();
-            if (!(Objects.equals(booking.getBooker(), userId) || Objects.equals(item.getOwner(), userId))) {
+            Item item = itemRepository.findById(booking.getItem().getId()).get();
+            if (!(Objects.equals(booking.getBooker().getId(), userId) || Objects.equals(item.getOwner(), userId))) {
                 log.error("Получение данных о конкретном бронировании " +
                         " может быть выполнено либо автором бронирования, либо владельцем вещи," +
                         " к которой относится бронирование: {} ", bookingId);
@@ -117,17 +120,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> getByUser(String state, Long userId) throws IncorrectParameterException {
+    public List<BookingResponseDto> getByUser(String state, Long userId)
+            throws IncorrectParameterException, NotFoundParameterException {
+
+        User user = userService.findById(userId);
         if (Booking.State.ALL.toString().equals(state)) {
             List<BookingResponseDto> list =
-                    BookingMapper.mapToBookingResponseDto(bookingRepository.findByBookerOrderByStartDesc(userId));
+                    BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerOrderByStartDesc(user));
             addItemName(list);
             return list;
         } else if (Booking.State.CURRENT.toString().equals(state)) {
 
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
+                            bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(user,
                                     LocalDateTime.now(), LocalDateTime.now()));
             addItemName(list);
             return list;
@@ -135,28 +142,29 @@ public class BookingServiceImpl implements BookingService {
         } else if (Booking.State.PAST.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(userId,
+                            bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user,
                                     LocalDateTime.now()));
             addItemName(list);
             return list;
         } else if (Booking.State.FUTURE.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                            bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(user,
+                                    LocalDateTime.now()));
             addItemName(list);
             return list;
         } else if (Booking.State.WAITING.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerAndStatusOrderByStartDesc(
-                                    userId, Booking.Status.valueOf(state)));
+                                    user, Booking.Status.valueOf(state)));
             addItemName(list);
             return list;
         } else if (Booking.State.REJECTED.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(
                             bookingRepository.findByBookerAndStatusOrderByStartDesc(
-                                    userId, Booking.Status.valueOf(state)));
+                                    user, Booking.Status.valueOf(state)));
             addItemName(list);
             return list;
         } else {

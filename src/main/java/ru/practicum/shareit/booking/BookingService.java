@@ -20,7 +20,8 @@ public interface BookingService {
 
     Optional<Booking> findById(Long bookingId) throws NotFoundParameterException;
 
-    List<BookingResponseDto> getByUser(String state, Long userId) throws IncorrectParameterException;
+    List<BookingResponseDto> getByUser(String state, Long userId)
+            throws IncorrectParameterException, NotFoundParameterException;
 
     List<BookingResponseDto> getByOwnerUser(String state, Long userId) throws IncorrectParameterException;
 }

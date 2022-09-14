@@ -175,10 +175,11 @@ public class ItemServiceImpl implements ItemService {
         }
         Comment comment = CommentMapper.toComment(commentDto);
         List<Booking> listOfPastBookings =
-                bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(userService.findById(userId),
+                        LocalDateTime.now());
         boolean ableToComment = false;
         for (Booking b : listOfPastBookings) {
-            if (Objects.equals(b.getItemId(), itemId) && b.getStatus() != Booking.Status.REJECTED) {
+            if (Objects.equals(b.getItem().getId(), itemId) && b.getStatus() != Booking.Status.REJECTED) {
                 ableToComment = true;
                 break;
             }
