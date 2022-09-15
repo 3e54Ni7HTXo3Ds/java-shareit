@@ -30,7 +30,7 @@ public class ItemDto {
     }
 
     public ItemDto(Long id, String name) {
-        this.id=id;
-        this.name=name;
+        this.id = id;
+        this.name = name;
     }
 }

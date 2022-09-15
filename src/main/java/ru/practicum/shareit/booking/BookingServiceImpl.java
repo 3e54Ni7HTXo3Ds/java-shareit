@@ -46,10 +46,8 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(Booking.Status.WAITING);
         Long itemId = booking.getItem().getId();
         if (itemId == null || booking.getStart() == null || booking.getEnd() == null ||
-        !itemRepository.existsById(itemId)
-        )
-
-        {
+                !itemRepository.existsById(itemId)
+        ) {
             log.error("Неверные параметры бронирования: {} ", booking);
             throw new NotFoundParameterException("Неверные параметры бронирования");
         }
