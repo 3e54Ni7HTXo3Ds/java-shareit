@@ -12,7 +12,7 @@ import java.util.Collection;
 public interface UserService {
     Collection<UserDto> findAll();
 
-    User findById(Long userId) throws IncorrectParameterException, NotFoundParameterException;
+    UserDto findById(Long userId) throws IncorrectParameterException, NotFoundParameterException;
 
     User create(UserDto userDto) throws CreatingException, IncorrectParameterException;
 

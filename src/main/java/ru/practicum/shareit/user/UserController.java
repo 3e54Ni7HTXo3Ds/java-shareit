@@ -29,7 +29,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public UserDto get(@PathVariable Long id) throws IncorrectParameterException, NotFoundParameterException {
-        return UserMapper.toUserDto(userService.findById(id));
+        return userService.findById(id);
     }
 
     @PostMapping

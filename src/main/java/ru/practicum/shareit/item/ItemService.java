@@ -30,8 +30,6 @@ public interface ItemService {
 
     List<ItemDto> search(String text);
 
-    Boolean itemExists(Long itemId);
-
     CommentResponseDto create(Long userId, Long itemId, CommentDto commentDto)
             throws IncorrectParameterException, NotFoundParameterException;
 }

@@ -33,10 +33,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(Long userId) throws NotFoundParameterException {
+    public UserDto findById(Long userId) throws NotFoundParameterException {
         if (userId > 0) {
             if (userRepository.findById(userId).isPresent()) {
-                return userRepository.findById(userId).get();
+                return UserMapper.toUserDto(userRepository.findById(userId).get());
             }
         } else log.error("Некорректный ID: {} ", userId);
         throw new NotFoundParameterException("Некорректный ID");
@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     public User update(Long userId, UserDto userDto)
             throws CreatingException, IncorrectParameterException, NotFoundParameterException {
         User userNew = UserMapper.toUser(userDto);
-        User user = findById(userId);
+        User user = userRepository.findById(userId).get();
         if (userNew.getEmail() != null) {
             user.setEmail(userNew.getEmail());
         }
