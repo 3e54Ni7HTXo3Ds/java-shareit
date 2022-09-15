@@ -48,7 +48,7 @@ public class ItemController {
     public ItemDto create(@RequestBody ItemDto itemDto,
                           @RequestHeader("X-Sharer-User-Id") Long userId) throws AuthException, IncorrectParameterException {
         userService.auth(userId);
-        return ItemMapper.toItemDto(itemService.create(userId, itemDto));
+        return itemService.create(userId, itemDto);
     }
 
     @PostMapping("/{id}/comment")

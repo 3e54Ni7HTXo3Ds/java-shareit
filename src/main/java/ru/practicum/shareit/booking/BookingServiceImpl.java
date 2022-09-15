@@ -59,7 +59,7 @@ public class BookingServiceImpl implements BookingService {
             log.error("Неверное время бронирования: {} ", booking);
             throw new IncorrectParameterException("Неверное время бронирования");
         }
-        if (Objects.equals(item.getOwner(), booking.getBooker().getId())) {
+        if (Objects.equals(item.getOwner().getId(), booking.getBooker().getId())) {
             log.error("Владелец не может бронировать: {} ", booking);
             throw new NotFoundParameterException("Владелец не может бронировать");
         }
@@ -74,7 +74,7 @@ public class BookingServiceImpl implements BookingService {
             throw new UpdateException("Бронирование не найдено");
         }
         Item item = findById(bookingId).get().getItem();
-        if (!Objects.equals(userId, item.getOwner())) {
+        if (!Objects.equals(userId, item.getOwner().getId())) {
             log.error("Подтверждать может только создатель: {} ", bookingId);
             throw new NotFoundParameterException("Подтверждать может только создатель");
         }
@@ -99,7 +99,7 @@ public class BookingServiceImpl implements BookingService {
         if (bookingId > 0 && bookingRepository.findById(bookingId).isPresent()) {
             Booking booking = bookingRepository.findById(bookingId).get();
             Item item = itemRepository.findById(booking.getItem().getId()).get();
-            if (!(Objects.equals(booking.getBooker().getId(), userId) || Objects.equals(item.getOwner(), userId))) {
+            if (!(Objects.equals(booking.getBooker().getId(), userId) || Objects.equals(item.getOwner().getId(), userId))) {
                 log.error("Получение данных о конкретном бронировании " +
                         " может быть выполнено либо автором бронирования, либо владельцем вещи," +
                         " к которой относится бронирование: {} ", bookingId);
@@ -126,8 +126,6 @@ public class BookingServiceImpl implements BookingService {
         List<BookingResponseDto> list = null;
         try {
             Booking.State var = Booking.State.valueOf(state);
-
-
             switch (var) {
                 case ALL:
                     list = BookingMapper.mapToBookingResponseDto(
@@ -159,7 +157,6 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException e) {
             throw new IncorrectParameterException("Unknown state: " + state);
         }
-        addItemName(list);
         return list;
     }
 
@@ -168,47 +165,40 @@ public class BookingServiceImpl implements BookingService {
         if (Booking.State.ALL.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findAllByOwner(userId));
-            addItemName(list);
+
             return list;
         } else if (Booking.State.CURRENT.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findCurrentByOwner(userId,
                             LocalDateTime.now()));
-            addItemName(list);
+
             return list;
         } else if (Booking.State.PAST.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findPastByOwner(userId,
                             LocalDateTime.now()));
-            addItemName(list);
+
             return list;
         } else if (Booking.State.FUTURE.toString().equals(state)) {
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findFutureByOwner(userId,
                             LocalDateTime.now()));
-            addItemName(list);
+
             return list;
         } else if (Booking.State.WAITING.toString().equals(state)) {
 
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findWaitingByOwner(userId));
-            addItemName(list);
+
             return list;
         } else if (Booking.State.REJECTED.toString().equals(state)) {
 
             List<BookingResponseDto> list =
                     BookingMapper.mapToBookingResponseDto(bookingRepository.findRejectedByOwner(userId));
-            addItemName(list);
+
             return list;
         } else {
             throw new IncorrectParameterException("Unknown state: UNSUPPORTED_STATUS");
-        }
-    }
-
-    private void addItemName(List<BookingResponseDto> list) {
-        for (BookingResponseDto i : list) {
-            ItemDto item = i.getItem();
-            item.setName(itemRepository.findById(item.getId()).get().getName());
         }
     }
 }

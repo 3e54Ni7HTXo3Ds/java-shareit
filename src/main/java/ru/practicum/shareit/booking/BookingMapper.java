@@ -44,8 +44,9 @@ public class BookingMapper implements Converter<Booking, BookingDto> {
     public static BookingResponseDto toBookingResponseDto(Booking booking) {
         UserDto responseBooker = new UserDto();
         responseBooker.setId(booking.getBooker().getId());
-        ItemDto responseItem = new ItemDto();
-        responseItem.setId(booking.getItem().getId());
+        ItemDto responseItem = new ItemDto(booking.getItem().getId(), booking.getItem().getName());
+        //  responseItem.setId();
+
 
         String startDate = dateTimeFormatter.format(booking.getStart());
 

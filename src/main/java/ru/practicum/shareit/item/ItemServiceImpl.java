@@ -41,7 +41,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemResponseDto> findAll(Long userId) {
         List<ItemResponseDto> list = itemRepository.findAll().stream()
-                .filter(r -> Objects.equals(r.getOwner(), userId))
+                .filter(r -> Objects.equals(r.getOwner().getId(), userId))
                 .sorted(Comparator.comparing(Item::getId))
                 .map(ItemMapper::toItemResponseDto)
                 .collect(Collectors.toList());
@@ -93,17 +93,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item create(Long userId, ItemDto itemDto) throws IncorrectParameterException {
+    public ItemDto create(Long userId, ItemDto itemDto) throws IncorrectParameterException {
         Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(userId);
-        if (
-                item.getAvailable() == null || item.getName() == null || item.getDescription() == null ||
-                        item.getName().isBlank() ||
-                        item.getDescription().isBlank()) {
+        item.setOwner(new User(userId, null, null));
+        if (item.getAvailable() == null || item.getName() == null || item.getDescription() == null ||
+                item.getName().isBlank() ||
+                item.getDescription().isBlank()) {
             log.error("Неверные параметры вещи: {} ", item);
             throw new IncorrectParameterException("Неверные параметры вещи");
         }
-        return itemRepository.save(item);
+        return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
     @Override
@@ -113,7 +112,7 @@ public class ItemServiceImpl implements ItemService {
             log.error("Вещь не найдена: {} ", itemId);
             throw new UpdateException("Вещь не найдена");
         }
-        if (!Objects.equals(userId, findById(itemId).getOwner())) {
+        if (!Objects.equals(userId, findById(itemId).getOwner().getId())) {
             throw new NotFoundParameterException("Изменять может только создатель");
         }
         Item itemNew = ItemMapper.toItem(itemDto);

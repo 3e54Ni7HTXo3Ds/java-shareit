@@ -25,37 +25,37 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query(" select b from Booking b " +
             "join Item i on b.item.id=i.id " +
-            "where i.owner =  ?1 and b.status<>'REJECTED'" +
+            "where i.owner.id =  ?1 and b.status<>'REJECTED'" +
             "order by b.start desc ")
     List<Booking> findAllByOwner(Long userId);
 
     @Query(" select b from Booking b " +
             "join Item i on b.item.id=i.id " +
-            "where i.owner =  ?1 and b.status='WAITING'" +
+            "where i.owner.id =  ?1 and b.status='WAITING'" +
             "order by b.start desc ")
     List<Booking> findWaitingByOwner(Long userId);
 
     @Query(" select b from Booking b " +
             "join Item i on b.item.id=i.id " +
-            "where i.owner =  ?1 and b.status='REJECTED'" +
+            "where i.owner.id =  ?1 and b.status='REJECTED'" +
             "order by b.start desc ")
     List<Booking> findRejectedByOwner(Long userId);
 
     @Query(" select b from Booking b " +
             "join Item i on b.item.id=i.id " +
-            "where i.owner =  ?1 and b.start>?2 and b.status<>'REJECTED'" +
+            "where i.owner.id =  ?1 and b.start>?2 and b.status<>'REJECTED'" +
             "order by b.start desc ")
     List<Booking> findFutureByOwner(Long userId, LocalDateTime now);
 
     @Query(" select b from Booking b " +
             "join Item i on b.item.id=i.id " +
-            "where i.owner =  ?1 and b.start<?2 and b.status<>'REJECTED'" +
+            "where i.owner.id =  ?1 and b.start<?2 and b.status<>'REJECTED'" +
             "order by b.start desc ")
     List<Booking> findPastByOwner(Long userId, LocalDateTime now);
 
     @Query(" select b from Booking b " +
             "join Item i on b.item.id=i.id " +
-            "where i.owner =  ?1 and b.start<?2 and b.end>?2 " +
+            "where i.owner.id =  ?1 and b.start<?2 and b.end>?2 " +
             "order by b.start desc ")
     List<Booking> findCurrentByOwner(Long userId, LocalDateTime now);
 }

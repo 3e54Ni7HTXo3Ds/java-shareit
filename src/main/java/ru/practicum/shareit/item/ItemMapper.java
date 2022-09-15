@@ -40,7 +40,7 @@ public class ItemMapper implements Converter<Item, ItemDto> {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getOwner(),
+                item.getOwner().getId(),
                 item.getRequestId() != null ? item.getRequestId() : null,
                 null,
                 null,

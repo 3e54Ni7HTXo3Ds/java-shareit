@@ -28,4 +28,9 @@ public class ItemDto {
         this.available = available;
         this.requestId = requestId;
     }
+
+    public ItemDto(Long id, String name) {
+        this.id=id;
+        this.name=name;
+    }
 }
