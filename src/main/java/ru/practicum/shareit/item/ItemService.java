@@ -23,7 +23,7 @@ public interface ItemService {
 
     ItemDto create(Long userId, ItemDto dto) throws IncorrectParameterException;
 
-    Item update(Long itemId, Long userId, ItemDto dto)
+    ItemDto update(Long itemId, Long userId, ItemDto dto)
             throws NotFoundParameterException, IncorrectParameterException, UpdateException;
 
     void delete(Long itemId);

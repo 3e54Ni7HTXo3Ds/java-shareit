@@ -106,7 +106,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item update(Long itemId, Long userId, ItemDto itemDto) throws
+    public ItemDto update(Long itemId, Long userId, ItemDto itemDto) throws
             NotFoundParameterException, IncorrectParameterException, UpdateException {
         if (!itemRepository.existsById(itemId)) {
             log.error("Вещь не найдена: {} ", itemId);
@@ -127,7 +127,7 @@ public class ItemServiceImpl implements ItemService {
             item.setAvailable(itemNew.getAvailable());
         }
         log.info("Обновлена вещь: {} ", item);
-        return itemRepository.save(item);
+        return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
     @Override

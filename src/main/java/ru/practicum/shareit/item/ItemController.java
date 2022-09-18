@@ -65,7 +65,7 @@ public class ItemController {
                           @RequestBody ItemDto itemDto,
                           @RequestHeader("X-Sharer-User-Id") Long userId) throws CreatingException, AuthException, NotFoundParameterException, IncorrectParameterException, UpdateException {
         userService.auth(userId);
-        return ItemMapper.toItemDto(itemService.update(itemId, userId, itemDto));
+        return itemService.update(itemId, userId, itemDto);
     }
 
     @DeleteMapping("/{id}")
