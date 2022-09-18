@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.error.exceptions.CreatingException;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
+import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.Valid;
@@ -21,15 +22,14 @@ public class UserController {
 
     private final UserService userService;
 
-
     @GetMapping
     public Collection<UserDto> findAll() {
         return userService.findAll();
     }
 
     @GetMapping("/{id}")
-    public UserDto get(@PathVariable Long id) throws IncorrectParameterException {
-        return UserMapper.toUserDto(userService.findById(id));
+    public UserDto get(@PathVariable Long id) throws IncorrectParameterException, NotFoundParameterException {
+        return userService.findById(id);
     }
 
     @PostMapping
@@ -38,7 +38,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@PathVariable("id") Long userId, @Valid @RequestBody UserDto dto) throws CreatingException {
+    public UserDto update(@PathVariable("id") Long userId, @Valid @RequestBody UserDto dto) throws CreatingException, IncorrectParameterException, NotFoundParameterException {
         return UserMapper.toUserDto(userService.update(userId, dto));
     }
 

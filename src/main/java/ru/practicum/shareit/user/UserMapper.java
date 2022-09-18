@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import lombok.NonNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -9,7 +10,7 @@ import ru.practicum.shareit.user.model.User;
 public class UserMapper implements Converter<User, UserDto> {
 
     @Override
-    public UserDto convert(User user) {
+    public UserDto convert(@NonNull User user) {
         return toUserDto(user);
     }
 
