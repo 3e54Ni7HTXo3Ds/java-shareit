@@ -1,5 +1,6 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.model.User;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 
 
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "requests")
@@ -22,6 +24,10 @@ public class ItemRequest {
     @ManyToOne
     @JoinColumn(name = "requestor_id")
     private User requestor;// — пользователь, создавший запрос;
-    @Transient
+    @Column(name = "request_createdate")
     private LocalDateTime created;// — дата и время создания запроса.
+
+    public ItemRequest(String description) {
+        this.description=description;
+    }
 }
