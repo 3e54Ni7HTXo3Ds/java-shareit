@@ -64,12 +64,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public Collection<ItemRequestResponseDto> findAllPageble(Long userId, Integer from, Integer size)
             throws IncorrectParameterException {
-
         if (from == null || size == null) {
-            List<ItemRequestResponseDto> list =
-                    ItemRequestMapper.mapToItemRequestResponseDto(itemRequestRepository.findAll());
-
-            return list;
+            return ItemRequestMapper.mapToItemRequestResponseDto(itemRequestRepository.findAll());
         }
         if (from < 0 || size <= 0) {
             log.error("Неверные параметры : {} , {} ", from, size);
@@ -82,7 +78,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if (list.size() > 0) {
             for (ItemRequestResponseDto item : list) {
                 item.setItems(ItemMapper.mapToItemResponseDto(itemRepository.findItemByRequestId(item.getId())));
-            }}
+            }
+        }
         return list;
     }
 
@@ -95,6 +92,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             if (itemRequest.isPresent()) {
                 ItemRequestResponseDto itemRequestResponseDto =
                         ItemRequestMapper.toItemRequestResponseDto(itemRequest.get());
+
+                itemRequestResponseDto.setItems(
+                        ItemMapper.mapToItemResponseDto(itemRepository.findItemByRequestId(itemRequestId)));
                 return itemRequestResponseDto;
             }
         } else log.error("Некорректный ID: {} ", itemRequestId);

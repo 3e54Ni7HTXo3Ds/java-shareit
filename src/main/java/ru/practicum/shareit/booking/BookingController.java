@@ -49,17 +49,21 @@ public class BookingController {
 
     @GetMapping("")
     public List<BookingResponseDto> getByUser(@RequestParam(required = false, defaultValue = "ALL") String state,
+                                              @RequestParam(required = false) Integer from,
+                                              @RequestParam(required = false) Integer size,
                                               @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
-        return bookingService.getByUser(state, userId);
+        return bookingService.getByUser(state, userId, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingResponseDto> getByOwnerUser(@RequestParam(required = false, defaultValue = "ALL") String state,
+                                                   @RequestParam(required = false) Integer from,
+                                                   @RequestParam(required = false) Integer size,
                                                    @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException {
         userService.auth(userId);
-        return bookingService.getByOwnerUser(state, userId);
+        return bookingService.getByOwnerUser(state, userId, from, size);
     }
 }

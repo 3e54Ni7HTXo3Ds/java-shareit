@@ -41,7 +41,7 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestResponseDto get(@PathVariable Long requestId,
+    public ItemRequestResponseDto findById(@PathVariable Long requestId,
                                       @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
