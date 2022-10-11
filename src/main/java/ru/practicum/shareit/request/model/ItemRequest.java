@@ -28,6 +28,6 @@ public class ItemRequest {
     private LocalDateTime created;// — дата и время создания запроса.
 
     public ItemRequest(String description) {
-        this.description=description;
+        this.description = description;
     }
 }

@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -127,95 +126,98 @@ public class BookingServiceImpl implements BookingService {
             throws IncorrectParameterException {
         User user = userRepository.findById(userId).get();
         List<BookingResponseDto> list = null;
-        if (from == null || size == null) {
-            try {
-                Booking.State var = Booking.State.valueOf(state);
-                switch (var) {
-                    case ALL:
-                        list = BookingMapper.mapToBookingResponseDto(
-                                bookingRepository.findByBookerOrderByStartDesc(user));
-                        break;
-                    case CURRENT:
-                        list =
-                                BookingMapper.mapToBookingResponseDto(
-                                        bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
-                                                user,
-                                                LocalDateTime.now(), LocalDateTime.now()));
-                        break;
-                    case PAST:
-                        list = BookingMapper.mapToBookingResponseDto(
-                                bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user,
-                                        LocalDateTime.now()));
-                        break;
-                    case FUTURE:
-                        list = BookingMapper.mapToBookingResponseDto(
-                                bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(user,
-                                        LocalDateTime.now()));
-                        break;
-                    case WAITING:
-                    case REJECTED:
-                        list = BookingMapper.mapToBookingResponseDto(
-                                bookingRepository.findByBookerAndStatusOrderByStartDesc(
-                                        user, Booking.Status.valueOf(state)));
-                        break;
-                }
-            } catch (IllegalArgumentException e) {
-                throw new IncorrectParameterException("Unknown state: " + state);
-            }
-            return list;
-        }
-        if (from < 0 || size <= 0) {
-            log.error("Неверные параметры : {} , {} ", from, size);
-            throw new IncorrectParameterException("Неверные параметры ");
-        }
-        PageRequest pageRequest = PageRequest.of(from, size);
+        try {
+            OffsetBasedPageRequest pageRequest = null;
 
+            if (from != null && size != null) {
+                pageRequest = new OffsetBasedPageRequest(from, size);
+            }
+            if ((from != null && from < 0) || (size != null && size <= 0)) {
+                log.error("Неверные параметры : {} , {} ", from, size);
+                throw new IncorrectParameterException("Неверные параметры ");
+            }
+
+            Booking.State var = Booking.State.valueOf(state);
+            switch (var) {
+                case ALL:
+                    list = BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerOrderByStartDesc(user,
+                                    pageRequest));
+                    break;
+                case CURRENT:
+                    list =
+                            BookingMapper.mapToBookingResponseDto(
+                                    bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                                            user,
+                                            LocalDateTime.now(), LocalDateTime.now()));
+                    break;
+                case PAST:
+                    list = BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user,
+                                    LocalDateTime.now()));
+                    break;
+                case FUTURE:
+                    list = BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(user,
+                                    LocalDateTime.now()));
+                    break;
+                case WAITING:
+                case REJECTED:
+                    list = BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerAndStatusOrderByStartDesc(
+                                    user, Booking.Status.valueOf(state)));
+                    break;
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IncorrectParameterException("Unknown state: " + state);
+        }
         return list;
     }
+
 
     @Override
     public List<BookingResponseDto> getByOwnerUser(String state, Long userId, Integer from, Integer size)
             throws IncorrectParameterException {
         List<BookingResponseDto> list = null;
-        if (from == null || size == null) {
-            try {
-                Booking.State var = Booking.State.valueOf(state);
-                switch (var) {
-                    case ALL:
-                        list = BookingMapper.mapToBookingResponseDto(bookingRepository.findAllByOwner(userId));
-                        break;
-                    case CURRENT:
-                        list =
-                                BookingMapper.mapToBookingResponseDto(bookingRepository.findCurrentByOwner(userId,
-                                        LocalDateTime.now()));
-                        break;
-                    case PAST:
-                        list = BookingMapper.mapToBookingResponseDto(bookingRepository.findPastByOwner(userId,
-                                LocalDateTime.now()));
-                        break;
-                    case FUTURE:
-                        list = BookingMapper.mapToBookingResponseDto(bookingRepository.findFutureByOwner(userId,
-                                LocalDateTime.now()));
-                        break;
-                    case WAITING:
-
-                        list = BookingMapper.mapToBookingResponseDto(bookingRepository.findWaitingByOwner(userId));
-                        break;
-                    case REJECTED:
-                        list = BookingMapper.mapToBookingResponseDto(bookingRepository.findRejectedByOwner(userId));
-                        break;
-                }
-            } catch (IllegalArgumentException e) {
-                throw new IncorrectParameterException("Unknown state: " + state);
+        try {
+            OffsetBasedPageRequest pageRequest = null;
+            if (from != null && size != null) {
+                pageRequest = new OffsetBasedPageRequest(from, size);
             }
-            return list;
-        }
+            if ((from != null && from < 0) || (size != null && size <= 0)) {
+                log.error("Неверные параметры : {} , {} ", from, size);
+                throw new IncorrectParameterException("Неверные параметры ");
+            }
 
-        if (from < 0 || size <= 0) {
-            log.error("Неверные параметры : {} , {} ", from, size);
-            throw new IncorrectParameterException("Неверные параметры ");
+            Booking.State var = Booking.State.valueOf(state);
+            switch (var) {
+                case ALL:
+                    list = BookingMapper.mapToBookingResponseDto(bookingRepository.findAllByOwner(userId, pageRequest));
+                    break;
+                case CURRENT:
+                    list =
+                            BookingMapper.mapToBookingResponseDto(bookingRepository.findCurrentByOwner(userId,
+                                    LocalDateTime.now()));
+                    break;
+                case PAST:
+                    list = BookingMapper.mapToBookingResponseDto(bookingRepository.findPastByOwner(userId,
+                            LocalDateTime.now()));
+                    break;
+                case FUTURE:
+                    list = BookingMapper.mapToBookingResponseDto(bookingRepository.findFutureByOwner(userId,
+                            LocalDateTime.now()));
+                    break;
+                case WAITING:
+
+                    list = BookingMapper.mapToBookingResponseDto(bookingRepository.findWaitingByOwner(userId));
+                    break;
+                case REJECTED:
+                    list = BookingMapper.mapToBookingResponseDto(bookingRepository.findRejectedByOwner(userId));
+                    break;
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IncorrectParameterException("Unknown state: " + state);
         }
-        PageRequest pageRequest = PageRequest.of(from, size);
         return list;
     }
 }
