@@ -85,8 +85,8 @@ public class OffsetBasedPageRequest implements Pageable, Serializable {
     }
 
     @Override
-    public Pageable withPage(int pageNumber) {
-        return null;
+    public @NonNull Pageable withPage(int pageNumber) {
+        return next();
     }
 
     @Override
