@@ -71,8 +71,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(Long userId) {
         if (userId > 0) {
-            log.info("Удаляем пользователя: {} ", userId);
-            userRepository.deleteById(userId);
+            if (userRepository.existsById(userId)) {
+                log.info("Удаляем пользователя: {} ", userId);
+                userRepository.deleteById(userId);
+            } else {
+                log.info("Нет пользователя: {} ", userId);
+            }
         } else log.error("Некорректный ID: {} ", userId);
     }
 
