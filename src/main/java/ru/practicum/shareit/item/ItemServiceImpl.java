@@ -93,7 +93,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto create(Long userId, ItemDto itemDto) throws IncorrectParameterException {
+    public ItemResponseDto create(Long userId, ItemDto itemDto) throws IncorrectParameterException {
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(new User(userId, null, null));
         if (item.getAvailable() == null || item.getName() == null || item.getDescription() == null ||
@@ -102,11 +102,11 @@ public class ItemServiceImpl implements ItemService {
             log.error("Неверные параметры вещи: {} ", item);
             throw new IncorrectParameterException("Неверные параметры вещи");
         }
-        return ItemMapper.toItemDto(itemRepository.save(item));
+        return ItemMapper.toItemResponseDto(itemRepository.save(item));
     }
 
     @Override
-    public ItemDto update(Long itemId, Long userId, ItemDto itemDto) throws
+    public ItemResponseDto update(Long itemId, Long userId, ItemDto itemDto) throws
             NotFoundParameterException, IncorrectParameterException, UpdateException {
         if (!itemRepository.existsById(itemId)) {
             log.error("Вещь не найдена: {} ", itemId);
@@ -127,7 +127,7 @@ public class ItemServiceImpl implements ItemService {
             item.setAvailable(itemNew.getAvailable());
         }
         log.info("Обновлена вещь: {} ", item);
-        return ItemMapper.toItemDto(itemRepository.save(item));
+        return ItemMapper.toItemResponseDto(itemRepository.save(item));
     }
 
     @Override

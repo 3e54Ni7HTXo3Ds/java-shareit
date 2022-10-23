@@ -21,9 +21,9 @@ public interface ItemService {
     ItemResponseDto findByIdDto(Long itemId, Long userId)
             throws IncorrectParameterException, NotFoundParameterException;
 
-    ItemDto create(Long userId, ItemDto dto) throws IncorrectParameterException;
+    ItemResponseDto create(Long userId, ItemDto dto) throws IncorrectParameterException;
 
-    ItemDto update(Long itemId, Long userId, ItemDto dto)
+    ItemResponseDto update(Long itemId, Long userId, ItemDto dto)
             throws NotFoundParameterException, IncorrectParameterException, UpdateException;
 
     void delete(Long itemId);

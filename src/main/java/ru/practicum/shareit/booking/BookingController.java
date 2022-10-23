@@ -23,11 +23,11 @@ public class BookingController {
     private final UserService userService;
 
     @PostMapping //Запрос может быть создан любым пользователем, а затем подтверждён владельцем вещи.
-    public BookingDto create(@RequestBody BookingDto bookingDto,
+    public BookingResponseDto create(@RequestBody BookingDto bookingDto,
                              @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
-        return BookingMapper.toBookingDto(bookingService.create(userId, bookingDto));
+        return BookingMapper.toBookingResponseDto(bookingService.create(userId, bookingDto));
     }
 
     @PatchMapping("/{id}") //Может быть выполнено только владельцем вещи.

@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +14,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -38,96 +42,149 @@ class BookingControllerTest {
     private UserService userService;
     @MockBean
     private BookingService bookingService;
-    private final ObjectMapper mapper = new ObjectMapper();
+
+    @Autowired
+    private ObjectMapper mapper;
     @Autowired
     private MockMvc mockMvc;
 
-    private BookingDto bookingDto;
     private UserDto userDto;
-
+    private Booking booking;
 
     @BeforeEach
     void setUp() {
-        userDto = new UserDto(
+        User user1 = new User(1L, "John", "john.doe@mail.com");
+        User user2 = new User(2L, "Sam", "1@1.com");
+        Item item = new Item(
                 1L,
-                "John",
-                "john.doe@mail.com");
-
-        bookingDto = new BookingDto(
+                "Ионный трансформатор",
+                "Внеземные технологии",
+                true,
+                user2,
+                null
+        );
+        booking = new Booking(
                 1L,
-                LocalDateTime.now().plusMinutes(10),
-                LocalDateTime.now().plusMinutes(70),
-                1L,
-                1L,
+                (LocalDateTime.now().plusMinutes(10).truncatedTo(ChronoUnit.SECONDS)),
+                (LocalDateTime.now().plusMinutes(70).truncatedTo(ChronoUnit.SECONDS)),
+                item,
+                user1,
                 Booking.Status.WAITING
         );
+
+        userDto = UserMapper.toUserDto(user1);
+        BookingDto bookingDto = BookingMapper.toBookingDto(booking);
     }
 
     @Test
     void createNewBooking() throws Exception {
         when(bookingService.create(anyLong(), any()))
-                .thenReturn(BookingMapper.toBooking(bookingDto));
+                .thenReturn(booking);
 
         mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id",userDto.getId())
-                        .content(mapper.writeValueAsString(bookingDto))
+                        .header("X-Sharer-User-Id", userDto.getId())
+                        .content(mapper.writeValueAsString(booking))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(bookingDto.getId()), Long.class))
-                .andExpect(jsonPath("$.start", is(bookingDto.getStart()), LocalDateTime.class))
-                .andExpect(jsonPath("$.end", is(bookingDto.getEnd()), LocalDateTime.class))
-                .andExpect(jsonPath("$.itemId", is(bookingDto.getItemId()), BookingDto.class))
-                .andExpect(jsonPath("$.booker", is(bookingDto.getBookerId())))
-                .andExpect(jsonPath("$.status", is(bookingDto.getStatus())));
+                .andExpect(jsonPath("$.id", is(booking.getId()), Long.class))
+                .andExpect(jsonPath("$.start", is(booking.getStart().toString()), String.class))
+                .andExpect(jsonPath("$.end", is(booking.getEnd().toString()), String.class))
+                .andExpect(jsonPath("$.item.id", is(booking.getItem().getId()), Long.class))
+                .andExpect(jsonPath("$.booker.id", is(booking.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.status", is(booking.getStatus().toString()), Booking.Status.class));
     }
 
     @Test
-    void getAllUsers() throws Exception {
-        when(userService.findAll()).thenReturn(List.of(userDto));
+    void updateBooking() throws Exception {
+        when(bookingService.update(anyLong(), anyLong(), anyBoolean()))
+                .thenReturn(BookingMapper.toBookingResponseDto(booking));
 
-        mockMvc.perform(get("/users"))
+        mockMvc.perform(patch("/bookings/{id}", booking.getId())
+                        .header("X-Sharer-User-Id", userDto.getId())
+                        .param("approved", String.valueOf(true))
+                        .content(mapper.writeValueAsString(booking))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(booking.getId()), Long.class))
+                .andExpect(jsonPath("$.start", is(booking.getStart().toString()), String.class))
+                .andExpect(jsonPath("$.end", is(booking.getEnd().toString()), String.class))
+                .andExpect(jsonPath("$.item.id", is(booking.getItem().getId()), Long.class))
+                .andExpect(jsonPath("$.booker.id", is(booking.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.status", is(booking.getStatus().toString()), Booking.Status.class));
+    }
+
+    @Test
+    void getBooking() throws Exception {
+        when(bookingService.findById(anyLong(), anyLong()))
+                .thenReturn(BookingMapper.toBookingResponseDto(booking));
+
+        mockMvc.perform(get("/bookings/{id}", booking.getId())
+                        .header("X-Sharer-User-Id", userDto.getId())
+                        .content(mapper.writeValueAsString(booking))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(booking.getId()), Long.class))
+                .andExpect(jsonPath("$.start", is(booking.getStart().toString()), String.class))
+                .andExpect(jsonPath("$.end", is(booking.getEnd().toString()), String.class))
+                .andExpect(jsonPath("$.item.id", is(booking.getItem().getId()), Long.class))
+                .andExpect(jsonPath("$.booker.id", is(booking.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.status", is(booking.getStatus().toString()), Booking.Status.class));
+    }
+
+    @Test
+    void getBookings() throws Exception {
+        when(bookingService.getByUser(anyString(), anyLong(), anyInt(), anyInt()))
+                .thenReturn(BookingMapper.mapToBookingResponseDto(List.of(booking)));
+
+        mockMvc.perform(get("/bookings", booking.getId())
+                        .header("X-Sharer-User-Id", userDto.getId())
+                        .param("from", "1")
+                        .param("size", "1")
+                        .param("state", "ALL")
+                        .content(mapper.writeValueAsString(booking))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(userDto.getId()), Long.class))
-                .andExpect(jsonPath("$[0].name", is(userDto.getName())))
-                .andExpect(jsonPath("$[0].email", is(userDto.getEmail())));
+                .andExpect(jsonPath("$[0].id", is(booking.getId()), Long.class))
+                .andExpect(jsonPath("$[0].start", is(booking.getStart().toString()), String.class))
+                .andExpect(jsonPath("$[0].end", is(booking.getEnd().toString()), String.class))
+                .andExpect(jsonPath("$[0].item.id", is(booking.getItem().getId()), Long.class))
+                .andExpect(jsonPath("$[0].booker.id", is(booking.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$[0].status", is(booking.getStatus().toString()), Booking.Status.class));
     }
 
     @Test
-    void getUser() throws Exception {
-        when(userService.findById(any())).thenReturn(userDto);
+    void getBookingsByOwner() throws Exception {
+        when(bookingService.getByOwnerUser(anyString(), anyLong(), anyInt(), anyInt()))
+                .thenReturn(BookingMapper.mapToBookingResponseDto(List.of(booking)));
 
-        mockMvc.perform(get("/users/{id}", userDto.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(userDto.getName())))
-                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
-    }
-
-    @Test
-    void updateUser() throws Exception {
-        when(userService.update(anyLong(), eq(userDto)))
-                .thenReturn(UserMapper.toUser(userDto));
-
-        mockMvc.perform(patch("/users/{id}", userDto.getId())
-                        .content(mapper.writeValueAsString(userDto))
+        mockMvc.perform(get("/bookings/owner", booking.getId())
+                        .header("X-Sharer-User-Id", userDto.getId())
+                        .param("from", "1")
+                        .param("size", "1")
+                        .param("state", "ALL")
+                        .content(mapper.writeValueAsString(booking))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(userDto.getName())))
-                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(booking.getId()), Long.class))
+                .andExpect(jsonPath("$[0].start", is(booking.getStart().toString()), String.class))
+                .andExpect(jsonPath("$[0].end", is(booking.getEnd().toString()), String.class))
+                .andExpect(jsonPath("$[0].item.id", is(booking.getItem().getId()), Long.class))
+                .andExpect(jsonPath("$[0].booker.id", is(booking.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$[0].status", is(booking.getStatus().toString()), Booking.Status.class));
     }
 
-    @Test
-    void deleteUser() throws Exception {
-        mockMvc.perform(delete("/users/{id}", userDto.getId()))
-                .andExpect(status().isOk());
-
-    }
 
 }
 
