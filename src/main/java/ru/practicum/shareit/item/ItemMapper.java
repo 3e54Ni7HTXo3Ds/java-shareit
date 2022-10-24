@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class ItemMapper{
+public class ItemMapper {
 
     public static ItemDto toItemDto(Item item) {
         return new ItemDto(
