@@ -45,7 +45,7 @@ public class ItemRequestController {
                                       @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
-        return itemRequestService.findByIdDto(requestId, userId);
+        return itemRequestService.findById(requestId, userId);
     }
 
     @GetMapping("/all")

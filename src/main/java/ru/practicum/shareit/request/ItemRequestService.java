@@ -16,7 +16,7 @@ public interface ItemRequestService {
             throws NotFoundParameterException,
             IncorrectParameterException;
 
-    ItemRequestResponseDto findByIdDto(Long itemId, Long userId)
+    ItemRequestResponseDto findById(Long itemId, Long userId)
             throws IncorrectParameterException, NotFoundParameterException;
 
     ItemRequestResponseDto create(Long userId, ItemRequestDto dto) throws IncorrectParameterException;

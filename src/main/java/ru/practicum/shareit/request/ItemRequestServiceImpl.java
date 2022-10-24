@@ -74,7 +74,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
 
     @Override
-    public ItemRequestResponseDto findByIdDto(Long itemRequestId, Long userId)
+    public ItemRequestResponseDto findById(Long itemRequestId, Long userId)
             throws NotFoundParameterException {
         if (itemRequestId > 0) {
             Optional<ItemRequest> itemRequest = itemRequestRepository.findById(itemRequestId);
