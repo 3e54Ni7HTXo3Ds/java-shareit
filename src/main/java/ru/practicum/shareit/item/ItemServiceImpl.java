@@ -136,13 +136,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(String text) {
+    public List<ItemResponseDto> search(String text) {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
         return itemRepository.search(text.toLowerCase()).stream()
                 .filter(r -> Objects.equals(r.getAvailable(), true))
-                .map(item -> conversionService.convert(item, ItemDto.class))
+                .map(ItemMapper::toItemResponseDto)
                 .collect(Collectors.toList());
     }
 

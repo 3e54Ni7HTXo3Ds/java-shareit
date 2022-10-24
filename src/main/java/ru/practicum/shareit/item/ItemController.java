@@ -49,8 +49,8 @@ public class ItemController {
 
     @PatchMapping("/{id}")
     public ItemResponseDto update(@PathVariable("id") Long itemId,
-                          @RequestBody ItemDto itemDto,
-                          @RequestHeader("X-Sharer-User-Id") Long userId)
+                                  @RequestBody ItemDto itemDto,
+                                  @RequestHeader("X-Sharer-User-Id") Long userId)
             throws CreatingException, AuthException, NotFoundParameterException, IncorrectParameterException,
             UpdateException {
         userService.auth(userId);
@@ -65,8 +65,8 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> search(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                      @RequestParam String text) throws AuthException {
+    public Collection<ItemResponseDto> search(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                              @RequestParam String text) throws AuthException {
         userService.auth(userId);
         return itemService.search(text);
     }
