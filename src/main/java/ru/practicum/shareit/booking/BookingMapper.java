@@ -1,8 +1,6 @@
 package ru.practicum.shareit.booking;
 
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
@@ -19,16 +17,11 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class BookingMapper implements Converter<Booking, BookingDto> {
+public class BookingMapper {
 
     public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter
             .ofPattern("yyyy-MM-dd'T'HH:mm:ss")
             .withZone(ZoneOffset.UTC);
-
-    @Override
-    public BookingDto convert(@NonNull Booking booking) {
-        return toBookingDto(booking);
-    }
 
     public static BookingDto toBookingDto(Booking booking) {
         return new BookingDto(

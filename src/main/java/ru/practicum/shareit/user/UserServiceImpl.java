@@ -2,7 +2,6 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.error.exceptions.AuthException;
@@ -23,12 +22,11 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final ConversionService conversionService;
 
     @Override
     public Collection<UserDto> findAll() {
         return userRepository.findAll().stream()
-                .map(user -> conversionService.convert(user, UserDto.class))
+                .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
