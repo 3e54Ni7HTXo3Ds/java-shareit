@@ -15,13 +15,11 @@ import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @Data
@@ -33,7 +31,6 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final ItemService itemService;
-    private final UserService userService;
     private final UserRepository userRepository;
 
     @Override
@@ -45,18 +42,23 @@ public class BookingServiceImpl implements BookingService {
         booking.setBooker(userRepository.findById(userId).get());
         booking.setStatus(Booking.Status.WAITING);
         Long itemId = booking.getItem().getId();
-        if (itemId == null || booking.getStart() == null || booking.getEnd() == null ||
-                !itemRepository.existsById(itemId)
+        if (itemId == null
+                || booking.getStart() == null
+                || booking.getEnd() == null
+                || !itemRepository.existsById(itemId)
         ) {
             log.error("Неверные параметры бронирования: {} ", booking);
             throw new NotFoundParameterException("Неверные параметры бронирования");
         }
         Item item = itemService.findById(itemId);
+        booking.setItem(item);
         if (!item.getAvailable()) {
             log.error("Вещь недоступна для бронирования: {} ", booking);
             throw new IncorrectParameterException("Вещь недоступна для бронирования");
         }
-        if (start.isAfter(end) || start.isBefore(LocalDateTime.now()) || end.isBefore(LocalDateTime.now())) {
+        if (start.isAfter(end)
+                    || start.isBefore(LocalDateTime.now())
+                || end.isBefore(LocalDateTime.now())) {
             log.error("Неверное время бронирования: {} ", booking);
             throw new IncorrectParameterException("Неверное время бронирования");
         }
@@ -74,12 +76,12 @@ public class BookingServiceImpl implements BookingService {
             log.error("Бронирование не найдено: {} ", bookingId);
             throw new UpdateException("Бронирование не найдено");
         }
-        Item item = findById(bookingId).get().getItem();
+        Item item = bookingRepository.findById(bookingId).get().getItem();
         if (!Objects.equals(userId, item.getOwner().getId())) {
             log.error("Подтверждать может только создатель: {} ", bookingId);
             throw new NotFoundParameterException("Подтверждать может только создатель");
         }
-        Booking booking = findById(bookingId).get();
+        Booking booking = bookingRepository.findById(bookingId).get();
         if (approved) {
             if (booking.getStatus() == Booking.Status.APPROVED) {
                 log.error("Нельзя изменить после подтверждения: {} ", bookingId);
@@ -116,10 +118,10 @@ public class BookingServiceImpl implements BookingService {
         throw new NotFoundParameterException("Некорректный ID");
     }
 
-    @Override
-    public Optional<Booking> findById(Long bookingId) {
-        return bookingRepository.findById(bookingId);
-    }
+//    @Override
+//             public Optional<Booking> findById(Long bookingId) {
+//        return bookingRepository.findById(bookingId);
+//    }
 
     @Override
     public List<BookingResponseDto> getByUser(String state, Long userId, Integer from, Integer size)

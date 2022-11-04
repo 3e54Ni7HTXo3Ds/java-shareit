@@ -38,7 +38,6 @@ public class UserServiceTest {
 
         when(userRepository.save(any())).then(invocation -> invocation.getArgument(0));
 
-
     }
 
 
