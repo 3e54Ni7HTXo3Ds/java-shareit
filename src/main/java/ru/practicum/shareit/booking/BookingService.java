@@ -17,10 +17,9 @@ public interface BookingService {
 
     BookingResponseDto findById(Long bookingId, Long userId) throws NotFoundParameterException;
 
- //   Optional<Booking> findById(Long bookingId) throws NotFoundParameterException;
-
     List<BookingResponseDto> getByUser(String state, Long userId, Integer from, Integer size)
             throws IncorrectParameterException, NotFoundParameterException;
 
-    List<BookingResponseDto> getByOwnerUser(String state, Long userId,Integer from, Integer size) throws IncorrectParameterException;
+    List<BookingResponseDto> getByOwnerUser(String state, Long userId, Integer from, Integer size)
+            throws IncorrectParameterException;
 }

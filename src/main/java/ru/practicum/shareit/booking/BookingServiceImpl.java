@@ -56,9 +56,9 @@ public class BookingServiceImpl implements BookingService {
             log.error("Вещь недоступна для бронирования: {} ", booking);
             throw new IncorrectParameterException("Вещь недоступна для бронирования");
         }
-        if (start.isAfter(end)
-                    || start.isBefore(LocalDateTime.now())
-                || end.isBefore(LocalDateTime.now())) {
+        if (end.isBefore(LocalDateTime.now())
+                || start.isBefore(LocalDateTime.now())
+                || start.isAfter(end)) {
             log.error("Неверное время бронирования: {} ", booking);
             throw new IncorrectParameterException("Неверное время бронирования");
         }
@@ -89,6 +89,10 @@ public class BookingServiceImpl implements BookingService {
             }
             booking.setStatus(Booking.Status.APPROVED);
         } else {
+            if (booking.getStatus() == Booking.Status.APPROVED) {
+                log.error("Нельзя изменить после подтверждения: {} ", bookingId);
+                throw new IncorrectParameterException("Нельзя изменить после подтверждения");
+            }
             booking.setStatus(Booking.Status.REJECTED);
         }
         bookingRepository.save(booking);
@@ -102,8 +106,8 @@ public class BookingServiceImpl implements BookingService {
         if (bookingId > 0 && bookingRepository.findById(bookingId).isPresent()) {
             Booking booking = bookingRepository.findById(bookingId).get();
             Item item = itemRepository.findById(booking.getItem().getId()).get();
-            if (!(Objects.equals(booking.getBooker().getId(), userId) || Objects.equals(item.getOwner().getId(),
-                    userId))) {
+            if (!(Objects.equals(booking.getBooker().getId(), userId) ||
+                    Objects.equals(item.getOwner().getId(), userId))) {
                 log.error("Получение данных о конкретном бронировании " +
                         " может быть выполнено либо автором бронирования, либо владельцем вещи," +
                         " к которой относится бронирование: {} ", bookingId);
@@ -117,11 +121,6 @@ public class BookingServiceImpl implements BookingService {
         } else log.error("Некорректный ID: {} ", bookingId);
         throw new NotFoundParameterException("Некорректный ID");
     }
-
-//    @Override
-//             public Optional<Booking> findById(Long bookingId) {
-//        return bookingRepository.findById(bookingId);
-//    }
 
     @Override
     public List<BookingResponseDto> getByUser(String state, Long userId, Integer from, Integer size)
@@ -143,31 +142,27 @@ public class BookingServiceImpl implements BookingService {
             switch (var) {
                 case ALL:
                     list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerOrderByStartDesc(user,
-                                    pageRequest));
+                            bookingRepository.findByBookerOrderByStartDesc(user, pageRequest));
                     break;
                 case CURRENT:
                     list =
                             BookingMapper.mapToBookingResponseDto(
                                     bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
-                                            user,
-                                            LocalDateTime.now(), LocalDateTime.now()));
+                                            user, LocalDateTime.now(), LocalDateTime.now()));
                     break;
                 case PAST:
                     list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user,
-                                    LocalDateTime.now()));
+                            bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user, LocalDateTime.now()));
                     break;
                 case FUTURE:
                     list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(user,
-                                    LocalDateTime.now()));
+                            bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(user, LocalDateTime.now()));
                     break;
                 case WAITING:
                 case REJECTED:
                     list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndStatusOrderByStartDesc(
-                                    user, Booking.Status.valueOf(state)));
+                            bookingRepository.findByBookerAndStatusOrderByStartDesc(user,
+                                    Booking.Status.valueOf(state)));
                     break;
             }
         } catch (IllegalArgumentException e) {
