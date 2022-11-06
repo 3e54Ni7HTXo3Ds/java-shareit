@@ -24,7 +24,7 @@ public class BookingController {
 
     @PostMapping //Запрос может быть создан любым пользователем, а затем подтверждён владельцем вещи.
     public BookingResponseDto create(@RequestBody BookingDto bookingDto,
-                             @RequestHeader("X-Sharer-User-Id") Long userId)
+                                     @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
         return BookingMapper.toBookingResponseDto(bookingService.create(userId, bookingDto));
@@ -49,8 +49,8 @@ public class BookingController {
 
     @GetMapping("")
     public List<BookingResponseDto> getByUser(@RequestParam(required = false, defaultValue = "ALL") String state,
-                                              @RequestParam(required = false) Integer from,
-                                              @RequestParam(required = false) Integer size,
+                                              @RequestParam(required = false, defaultValue = "0") Integer from,
+                                              @RequestParam(required = false, defaultValue = "10") Integer size,
                                               @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
@@ -59,8 +59,8 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingResponseDto> getByOwnerUser(@RequestParam(required = false, defaultValue = "ALL") String state,
-                                                   @RequestParam(required = false) Integer from,
-                                                   @RequestParam(required = false) Integer size,
+                                                   @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                   @RequestParam(required = false, defaultValue = "10") Integer size,
                                                    @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException {
         userService.auth(userId);

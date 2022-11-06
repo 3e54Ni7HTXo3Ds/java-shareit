@@ -9,8 +9,8 @@ import java.util.Optional;
 
 
 public class OffsetBasedPageRequest implements Pageable, Serializable {
-    private int limit;
-    private int offset;
+    private final int limit;
+    private final int offset;
     private final Sort sort;
 
     public OffsetBasedPageRequest(int offset, int limit, Sort sort) {

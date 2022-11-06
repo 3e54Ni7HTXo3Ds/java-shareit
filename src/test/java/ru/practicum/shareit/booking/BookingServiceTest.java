@@ -278,8 +278,13 @@ public class BookingServiceTest {
         var result4 = bookingServiceImpl.getByUser("FUTURE", user1.getId(), 1, 1);
         var result5 = bookingServiceImpl.getByUser("WAITING", user1.getId(), 1, 1);
         var result6 = bookingServiceImpl.getByUser("REJECTED", user1.getId(), 1, 1);
-      //  var result7 = bookingServiceImpl.getByUser("ALL", user1.getId(), 1, 1);
 
+        final IncorrectParameterException exception2 = assertThrows(IncorrectParameterException.class,
+                () -> bookingServiceImpl.getByUser("ALL", user1.getId(), -1, -1));
+
+        String state = "KEKE";
+        final IncorrectParameterException exception3 = assertThrows(IncorrectParameterException.class,
+                () -> bookingServiceImpl.getByUser(state, user1.getId(), 1, 1));
 
         assertNotNull(result1);
         assertEquals(List.of(bookingResponseDto), result1);
@@ -289,13 +294,49 @@ public class BookingServiceTest {
         assertEquals(List.of(bookingResponseDto), result5);
         assertEquals(List.of(bookingResponseDto), result6);
 
+        assertEquals("Неверные параметры", exception2.getMessage());
+        assertEquals("Unknown state: " + state, exception3.getMessage());
+
 
     }
 
 
     @Test
-    void getByOwnerUser() {
+    void getByOwnerUser() throws IncorrectParameterException {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(user2));
 
+        when(bookingRepository.findAllByOwner(any(), any())).thenReturn(List.of(booking1));
+        when(bookingRepository.findCurrentByOwner(any(), any())).thenReturn(List.of(booking1));
+        when(bookingRepository.findPastByOwner(any(), any())).thenReturn(List.of(booking1));
+        when(bookingRepository.findFutureByOwner(any(), any())).thenReturn(List.of(booking1));
+        when(bookingRepository.findWaitingByOwner(any())).thenReturn(List.of(booking1));
+        when(bookingRepository.findRejectedByOwner(any())).thenReturn(List.of(booking1));
+
+        var result1 = bookingServiceImpl.getByOwnerUser("ALL", user1.getId(), 1, 1);
+        var result2 = bookingServiceImpl.getByOwnerUser("CURRENT", user1.getId(), 1, 1);
+        var result3 = bookingServiceImpl.getByOwnerUser("PAST", user1.getId(), 1, 1);
+        var result4 = bookingServiceImpl.getByOwnerUser("FUTURE", user1.getId(), 1, 1);
+        var result5 = bookingServiceImpl.getByOwnerUser("WAITING", user1.getId(), 1, 1);
+        var result6 = bookingServiceImpl.getByOwnerUser("REJECTED", user1.getId(), 1, 1);
+
+        final IncorrectParameterException exception2 = assertThrows(IncorrectParameterException.class,
+                () -> bookingServiceImpl.getByOwnerUser("ALL", user1.getId(), -1, -1));
+
+        String state = "KEKE";
+        final IncorrectParameterException exception3 = assertThrows(IncorrectParameterException.class,
+                () -> bookingServiceImpl.getByOwnerUser(state, user1.getId(), 1, 1));
+
+        assertNotNull(result1);
+        assertEquals(List.of(bookingResponseDto), result1);
+        assertEquals(List.of(bookingResponseDto), result2);
+        assertEquals(List.of(bookingResponseDto), result3);
+        assertEquals(List.of(bookingResponseDto), result4);
+        assertEquals(List.of(bookingResponseDto), result5);
+        assertEquals(List.of(bookingResponseDto), result6);
+
+        assertEquals("Неверные параметры", exception2.getMessage());
+        assertEquals("Unknown state: " + state, exception3.getMessage());
 
     }
 }

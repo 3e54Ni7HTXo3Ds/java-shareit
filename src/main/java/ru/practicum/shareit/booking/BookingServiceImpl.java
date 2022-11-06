@@ -126,18 +126,17 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getByUser(String state, Long userId, Integer from, Integer size)
             throws IncorrectParameterException {
         User user = userRepository.findById(userId).get();
+        OffsetBasedPageRequest pageRequest = null;
+
+        if ((from >= 0) && (size > 0)) {
+            pageRequest = new OffsetBasedPageRequest(from, size);
+        } else {
+            log.error("Неверные параметры : {} , {} ", from, size);
+            throw new IncorrectParameterException("Неверные параметры");
+        }
+
         List<BookingResponseDto> list = null;
         try {
-            OffsetBasedPageRequest pageRequest = null;
-
-            if (from != null && size != null) {
-                pageRequest = new OffsetBasedPageRequest(from, size);
-            }
-            if ((from != null && from < 0) || (size != null && size <= 0)) {
-                log.error("Неверные параметры : {} , {} ", from, size);
-                throw new IncorrectParameterException("Неверные параметры ");
-            }
-
             Booking.State var = Booking.State.valueOf(state);
             switch (var) {
                 case ALL:
@@ -176,16 +175,14 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getByOwnerUser(String state, Long userId, Integer from, Integer size)
             throws IncorrectParameterException {
         List<BookingResponseDto> list = null;
+        OffsetBasedPageRequest pageRequest = null;
+        if ((from >= 0) && (size > 0)) {
+            pageRequest = new OffsetBasedPageRequest(from, size);
+        } else {
+            log.error("Неверные параметры : {} , {} ", from, size);
+            throw new IncorrectParameterException("Неверные параметры");
+        }
         try {
-            OffsetBasedPageRequest pageRequest = null;
-            if (from != null && size != null) {
-                pageRequest = new OffsetBasedPageRequest(from, size);
-            }
-            if ((from != null && from < 0) || (size != null && size <= 0)) {
-                log.error("Неверные параметры : {} , {} ", from, size);
-                throw new IncorrectParameterException("Неверные параметры ");
-            }
-
             Booking.State var = Booking.State.valueOf(state);
             switch (var) {
                 case ALL:
