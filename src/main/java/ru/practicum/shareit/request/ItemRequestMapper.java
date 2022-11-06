@@ -6,17 +6,11 @@ import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserMapper;
 
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class ItemRequestMapper {
-
-    public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter
-            .ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-            .withZone(ZoneOffset.UTC);
 
     public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto) {
         return new ItemRequest(itemRequestDto.getDescription());

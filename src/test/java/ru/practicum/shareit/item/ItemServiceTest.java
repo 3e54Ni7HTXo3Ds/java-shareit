@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
@@ -17,13 +18,13 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ItemServiceTest {
 
@@ -41,8 +42,10 @@ public class ItemServiceTest {
     private User user1;
     private User user2;
     private Item item1;
+    private Item item2;
 
-    private ItemDto itemDto;
+    private ItemDto itemDto1;
+    private ItemDto itemDto2;
     private Comment comment;
     private ItemResponseDto itemResponseDto;
 
@@ -64,7 +67,7 @@ public class ItemServiceTest {
                 user2,
                 null
         );
-        Item item2 = new Item(
+        item2 = new Item(
                 2L,
                 "не трансформатор",
                 "земные технологии",
@@ -73,7 +76,8 @@ public class ItemServiceTest {
                 null
         );
         itemResponseDto = ItemMapper.toItemResponseDto(item1);
-        itemDto = ItemMapper.toItemDto(item1);
+        itemDto1 = ItemMapper.toItemDto(item1);
+        itemDto2 = ItemMapper.toItemDto(item2);
 
         comment = new Comment(1L, "Comment", item1, user1,
                 LocalDateTime.now().minusMinutes(10).truncatedTo(ChronoUnit.SECONDS));
@@ -118,29 +122,29 @@ public class ItemServiceTest {
     @Test
     void create() throws IncorrectParameterException {
 
-        var result = itemServiceImpl.create(user2.getId(), itemDto);
+        var result = itemServiceImpl.create(user2.getId(), itemDto1);
         result.setId(1L);
 
-        itemDto.setAvailable(null);
+        itemDto1.setAvailable(null);
         final IncorrectParameterException exception1 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto));
-        itemDto.setAvailable(true);
-        itemDto.setName(null);
+                () -> itemServiceImpl.create(user2.getId(), itemDto1));
+        itemDto1.setAvailable(true);
+        itemDto1.setName(null);
         final IncorrectParameterException exception2 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto));
-        itemDto.setName("thing");
-        itemDto.setDescription(null);
+                () -> itemServiceImpl.create(user2.getId(), itemDto1));
+        itemDto1.setName("thing");
+        itemDto1.setDescription(null);
 
         final IncorrectParameterException exception3 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto));
-        itemDto.setDescription("desc");
-        itemDto.setName(" ");
+                () -> itemServiceImpl.create(user2.getId(), itemDto1));
+        itemDto1.setDescription("desc");
+        itemDto1.setName(" ");
         final IncorrectParameterException exception4 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto));
-        itemDto.setDescription(" ");
-        itemDto.setName("thing");
+                () -> itemServiceImpl.create(user2.getId(), itemDto1));
+        itemDto1.setDescription(" ");
+        itemDto1.setName("thing");
         final IncorrectParameterException exception5 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto));
+                () -> itemServiceImpl.create(user2.getId(), itemDto1));
 
         assertNotNull(result);
         assertEquals(itemResponseDto, result);
@@ -149,53 +153,68 @@ public class ItemServiceTest {
         assertEquals("Неверные параметры вещи", exception3.getMessage());
         assertEquals("Неверные параметры вещи", exception4.getMessage());
         assertEquals("Неверные параметры вещи", exception5.getMessage());
-
     }
 
     @Test
     void update()
-            throws IncorrectParameterException, UpdateException {
+            throws IncorrectParameterException, UpdateException, NotFoundParameterException {
+        when(itemRepository.existsById(1L)).thenReturn(true);
+        when(itemRepository.existsById(3L)).thenReturn(false);
+        when(itemRepository.findById(item1.getId())).thenReturn(Optional.ofNullable(item1));
 
-        var result = itemServiceImpl.create(user2.getId(), itemDto);
-        result.setId(1L);
+        var result = itemServiceImpl.update(item1.getId(), user2.getId(), itemDto1);
+        itemDto1.setDescription(null);
+        itemDto1.setName(null);
+        itemDto1.setAvailable(null);
+        var result1 = itemServiceImpl.update(item1.getId(), user2.getId(), itemDto1);
+        item1.setId(3L);
 
-        itemDto.setAvailable(null);
-        final IncorrectParameterException exception1 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto));
-        itemDto.setAvailable(true);
-        itemDto.setName(null);
-        final IncorrectParameterException exception2 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto));
-        itemDto.setName("thing");
-        itemDto.setDescription(null);
+        final UpdateException exception1 = assertThrows(UpdateException.class,
+                () -> itemServiceImpl.update(item1.getId(), user1.getId(), itemDto1));
 
-        final IncorrectParameterException exception3 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto));
-        itemDto.setDescription("desc");
-        itemDto.setName(" ");
-        final IncorrectParameterException exception4 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto));
-        itemDto.setDescription(" ");
-        itemDto.setName("thing");
-        final IncorrectParameterException exception5 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto));
+        item1.setId(1L);
+        final NotFoundParameterException exception2 = assertThrows(NotFoundParameterException.class,
+                () -> itemServiceImpl.update(item1.getId(), user1.getId(), itemDto1));
 
         assertNotNull(result);
+        assertNotNull(result1);
         assertEquals(itemResponseDto, result);
-        assertEquals("Неверные параметры вещи", exception1.getMessage());
-        assertEquals("Неверные параметры вещи", exception2.getMessage());
-        assertEquals("Неверные параметры вещи", exception3.getMessage());
-        assertEquals("Неверные параметры вещи", exception4.getMessage());
-        assertEquals("Неверные параметры вещи", exception5.getMessage());
-
+        assertEquals(itemResponseDto, result1);
+        assertEquals("Вещь не найдена", exception1.getMessage());
+        assertEquals("Изменять может только создатель", exception2.getMessage());
     }
 
     @Test
     void delete() {
+        //Assign
+
+        //Act
+        itemServiceImpl.delete(item1.getId());
+
+        //Assert
+        verify(itemRepository, Mockito.times(1)).deleteById(item1.getId());
+
+
     }
 
     @Test
     void search() {
+        String text1 = "ионный";
+        String text2 = "";
+        String text3 = null;
+
+        when(itemRepository.search(text1)).thenReturn(List.of(item1));
+
+        var result = itemServiceImpl.search(text1);
+        var result1 = itemServiceImpl.search(text2);
+        var result2 = itemServiceImpl.search(text3);
+
+        assertNotNull(result);
+        assertNotNull(result1);
+        assertNotNull(result2);
+        assertEquals(List.of(itemResponseDto), result);
+        assertEquals(new ArrayList<>(), result1);
+        assertEquals(new ArrayList<>(), result2);
     }
 
     @Test
@@ -203,7 +222,7 @@ public class ItemServiceTest {
             throws IncorrectParameterException, NotFoundParameterException {
 
 
-      //  var result = itemServiceImpl.create(user1.getId(), item1.getId(), commentDto);
+        //  var result = itemServiceImpl.create(user1.getId(), item1.getId(), commentDto);
     }
 
 }
