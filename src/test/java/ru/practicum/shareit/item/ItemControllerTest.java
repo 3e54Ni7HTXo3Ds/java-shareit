@@ -113,7 +113,7 @@ public class ItemControllerTest {
 
     @Test
     void getItem() throws Exception {
-        when(itemService.findByIdDto(anyLong(), anyLong()))
+        when(itemService.findById(anyLong(), anyLong()))
                 .thenReturn(ItemMapper.toItemResponseDto(item));
 
         mockMvc.perform(get("/items/{id}", item.getId())

@@ -40,7 +40,6 @@ public class ItemServiceImpl implements ItemService {
     public Collection<ItemResponseDto> findAll(Long userId) {
         List<ItemResponseDto> list =
                 ItemMapper.mapToItemResponseDto(itemRepository.findItemByOwnerIdOrderByIdAsc(userId));
-
         for (ItemResponseDto i : list) {
             i = addLastNextBooking(i.getId(), userId, i);
             list.set(list.indexOf(i), i);
@@ -49,27 +48,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item findById(Long itemId) throws NotFoundParameterException {
-        if (itemId > 0) {
-            Optional<Item> item = itemRepository.findById(itemId);
-            if (item.isPresent()) {
-                return item.get();
-            }
-        } else log.error("Некорректный ID: {} ", itemId);
-        throw new NotFoundParameterException("Некорректный ID");
-    }
-
-    @Override
-    public ItemResponseDto findByIdDto(Long itemId, Long userId)
+    public ItemResponseDto findById(Long itemId, Long userId)
             throws NotFoundParameterException {
         if (itemId > 0) {
             Optional<Item> item = itemRepository.findById(itemId);
             if (item.isPresent()) {
-                ItemResponseDto itemResponseDto = ItemMapper.toItemResponseDto(item.get());
-                itemResponseDto = addLastNextBooking(itemId, userId, itemResponseDto);
-                List<Comment> comments = commentRepository.findByItem(findById(itemId));
-                List<CommentResponseDto> commentResponseDtos =
-                        CommentMapper.mapToCommentResponseDto(comments);
+                ItemResponseDto itemResponseDto =
+                        addLastNextBooking(itemId, userId, ItemMapper.toItemResponseDto(item.get()));
+                List<Comment> comments = commentRepository.findByItem(itemRepository.findById(itemId).get());
+                List<CommentResponseDto> commentResponseDtos = CommentMapper.mapToCommentResponseDto(comments);
                 itemResponseDto.setCommentResponseDto((commentResponseDtos));
                 return itemResponseDto;
             }
@@ -94,9 +81,11 @@ public class ItemServiceImpl implements ItemService {
     public ItemResponseDto create(Long userId, ItemDto itemDto) throws IncorrectParameterException {
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(new User(userId, null, null));
-        if (item.getAvailable() == null || item.getName() == null || item.getDescription() == null ||
-                item.getName().isBlank() ||
-                item.getDescription().isBlank()) {
+        if (item.getAvailable() == null
+                || item.getName() == null
+                || item.getDescription() == null
+                || item.getName().isBlank()
+                || item.getDescription().isBlank()) {
             log.error("Неверные параметры вещи: {} ", item);
             throw new IncorrectParameterException("Неверные параметры вещи");
         }
@@ -111,7 +100,7 @@ public class ItemServiceImpl implements ItemService {
             throw new UpdateException("Вещь не найдена");
         }
         Item itemNew = ItemMapper.toItem(itemDto);
-        Item item = findById(itemId);
+        Item item = itemRepository.findById(itemId).get();
         if (!Objects.equals(userId, item.getOwner().getId())) {
             throw new NotFoundParameterException("Изменять может только создатель");
         }
@@ -155,7 +144,7 @@ public class ItemServiceImpl implements ItemService {
             log.error("Неверные параметры вещи: {} ", commentDto);
             throw new IncorrectParameterException("Неверные параметры вещи");
         }
-        Item item = findById(itemId);
+        Item item = itemRepository.findById(itemId).get();
         User user = userRepository.findById(userId).get();
         Comment comment = CommentMapper.toComment(commentDto);
         List<Booking> listOfPastBookings =

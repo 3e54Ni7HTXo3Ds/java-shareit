@@ -50,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
             log.error("Неверные параметры бронирования: {} ", booking);
             throw new NotFoundParameterException("Неверные параметры бронирования");
         }
-        Item item = itemService.findById(itemId);
+        Item item = itemRepository.findById(itemId).get();
         booking.setItem(item);
         if (!item.getAvailable()) {
             log.error("Вещь недоступна для бронирования: {} ", booking);
@@ -126,7 +126,7 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getByUser(String state, Long userId, Integer from, Integer size)
             throws IncorrectParameterException {
         User user = userRepository.findById(userId).get();
-        OffsetBasedPageRequest pageRequest = null;
+        OffsetBasedPageRequest pageRequest;
 
         if ((from >= 0) && (size > 0)) {
             pageRequest = new OffsetBasedPageRequest(from, size);
@@ -175,7 +175,7 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getByOwnerUser(String state, Long userId, Integer from, Integer size)
             throws IncorrectParameterException {
         List<BookingResponseDto> list = null;
-        OffsetBasedPageRequest pageRequest = null;
+        OffsetBasedPageRequest pageRequest;
         if ((from >= 0) && (size > 0)) {
             pageRequest = new OffsetBasedPageRequest(from, size);
         } else {

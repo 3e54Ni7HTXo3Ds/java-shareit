@@ -106,8 +106,8 @@ public class BookingServiceTest {
         //Assign
         when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
         when(userRepository.findById(2L)).thenReturn(Optional.of(user2));
-        when(itemService.findById(1L)).thenReturn(item1);
-        when(itemService.findById(2L)).thenReturn(item2);
+        when(itemRepository.findById(1L)).thenReturn(Optional.ofNullable(item1));
+        when(itemRepository.findById(2L)).thenReturn(Optional.ofNullable(item2));
         when(itemRepository.existsById(any())).thenReturn(true);
 
         //Act

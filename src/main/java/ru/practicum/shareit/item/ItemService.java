@@ -7,7 +7,6 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,9 +15,7 @@ public interface ItemService {
 
     Collection<ItemResponseDto> findAll(Long userId) throws NotFoundParameterException, IncorrectParameterException;
 
-    Item findById(Long itemId) throws IncorrectParameterException, NotFoundParameterException;
-
-    ItemResponseDto findByIdDto(Long itemId, Long userId)
+    ItemResponseDto findById(Long itemId, Long userId)
             throws IncorrectParameterException, NotFoundParameterException;
 
     ItemResponseDto create(Long userId, ItemDto dto) throws IncorrectParameterException;
