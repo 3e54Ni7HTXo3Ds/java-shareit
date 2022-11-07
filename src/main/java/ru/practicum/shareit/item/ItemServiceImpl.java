@@ -134,8 +134,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public CommentResponseDto create(Long userId, Long itemId, CommentDto commentDto)
-            throws IncorrectParameterException, NotFoundParameterException {
+    public CommentResponseDto createComment(Long userId, Long itemId, CommentDto commentDto)
+            throws IncorrectParameterException {
         if (commentDto.getText().isBlank()) {
             log.error("Неверный комментарий: {} ", commentDto);
             throw new IncorrectParameterException("Неверный комментарий");

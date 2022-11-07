@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user;
 
 import ru.practicum.shareit.error.exceptions.AuthException;
-import ru.practicum.shareit.error.exceptions.CreatingException;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -14,9 +13,11 @@ public interface UserService {
 
     UserDto findById(Long userId) throws IncorrectParameterException, NotFoundParameterException;
 
-    User create(UserDto userDto) throws CreatingException, IncorrectParameterException;
+    User create(UserDto userDto) throws
+             IncorrectParameterException;
 
-    User update(Long userId, UserDto userDto) throws CreatingException, IncorrectParameterException, NotFoundParameterException;
+    User update(Long userId, UserDto userDto) throws
+                    IncorrectParameterException, NotFoundParameterException;
 
     void delete(Long userId);
 

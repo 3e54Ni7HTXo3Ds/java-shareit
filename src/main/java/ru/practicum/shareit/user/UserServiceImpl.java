@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.error.exceptions.AuthException;
-import ru.practicum.shareit.error.exceptions.CreatingException;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -41,7 +40,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User create(UserDto userDto) throws CreatingException, IncorrectParameterException {
+    public User create(UserDto userDto) throws
+            IncorrectParameterException {
         User user = UserMapper.toUser(userDto);
         String email = user.getEmail();
         if (email == null || email.isBlank()) {
@@ -53,7 +53,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(Long userId, UserDto userDto)
-            throws CreatingException, IncorrectParameterException, NotFoundParameterException {
+            throws
+            IncorrectParameterException, NotFoundParameterException {
         User userNew = UserMapper.toUser(userDto);
         User user = userRepository.findById(userId).get();
         if (userNew.getEmail() != null) {

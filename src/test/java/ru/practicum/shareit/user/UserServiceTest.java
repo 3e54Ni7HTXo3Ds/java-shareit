@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import ru.practicum.shareit.error.exceptions.AuthException;
-import ru.practicum.shareit.error.exceptions.CreatingException;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -76,7 +75,8 @@ public class UserServiceTest {
     }
 
     @Test
-    void create() throws CreatingException, IncorrectParameterException {
+    void create() throws
+            IncorrectParameterException {
         //Assign
         UserDto emailnull = new UserDto(1L, null, null);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
@@ -95,7 +95,8 @@ public class UserServiceTest {
 
 
     @Test
-    void update() throws CreatingException, IncorrectParameterException, NotFoundParameterException {
+    void update() throws
+            IncorrectParameterException, NotFoundParameterException {
 
         //Assign
         when(userRepository.findById(any())).thenReturn(Optional.of(user));

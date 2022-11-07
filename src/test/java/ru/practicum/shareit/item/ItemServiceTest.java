@@ -5,10 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
@@ -43,10 +45,12 @@ public class ItemServiceTest {
     private User user2;
     private Item item1;
     private Item item2;
+    private Booking booking1;
 
     private ItemDto itemDto1;
     private ItemDto itemDto2;
     private Comment comment;
+    private CommentDto commentDto;
     private ItemResponseDto itemResponseDto;
 
     @BeforeEach
@@ -75,15 +79,24 @@ public class ItemServiceTest {
                 user1,
                 null
         );
+        booking1 = new Booking(
+                1L,
+                (LocalDateTime.now().plusMinutes(10).truncatedTo(ChronoUnit.SECONDS)),
+                (LocalDateTime.now().plusMinutes(70).truncatedTo(ChronoUnit.SECONDS)),
+                item1,
+                user1,
+                Booking.Status.WAITING
+        );
         itemResponseDto = ItemMapper.toItemResponseDto(item1);
         itemDto1 = ItemMapper.toItemDto(item1);
         itemDto2 = ItemMapper.toItemDto(item2);
 
         comment = new Comment(1L, "Comment", item1, user1,
-                LocalDateTime.now().minusMinutes(10).truncatedTo(ChronoUnit.SECONDS));
-        CommentDto commentDto = new CommentDto(comment.getText());
+                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+        commentDto = new CommentDto(comment.getText());
 
         when(itemRepository.save(any())).then(invocation -> invocation.getArgument(0));
+        when(commentRepository.save(any())).then(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -219,10 +232,22 @@ public class ItemServiceTest {
 
     @Test
     void createComment()
-            throws IncorrectParameterException, NotFoundParameterException {
+            throws IncorrectParameterException {
+        when(itemRepository.existsById(1L)).thenReturn(true);
+        when(itemRepository.findById(item1.getId())).thenReturn(Optional.ofNullable(item1));
+        when(userRepository.findById(item1.getId())).thenReturn(Optional.ofNullable(user1));
+        when(bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(eq(user1), any())).thenReturn(List.of(booking1));
+        CommentResponseDto commentResponseDto = CommentMapper.toCommentResponseDto(comment);
 
 
-        //  var result = itemServiceImpl.create(user1.getId(), item1.getId(), commentDto);
+        var result = itemServiceImpl.createComment(user1.getId(), item1.getId(), commentDto);
+        LocalDateTime time = result.getCreated().truncatedTo(ChronoUnit.SECONDS);
+        result.setCreated(time);
+        result.setId(1L);
+
+
+        assertNotNull(result);
+        assertEquals((commentResponseDto), result);
     }
 
 }

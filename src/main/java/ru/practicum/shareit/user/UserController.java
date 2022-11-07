@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.error.exceptions.CreatingException;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -33,12 +32,14 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto create(@Valid @RequestBody UserDto userDto) throws CreatingException, IncorrectParameterException {
+    public UserDto create(@Valid @RequestBody UserDto userDto) throws
+            IncorrectParameterException {
         return UserMapper.toUserDto(userService.create(userDto));
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@PathVariable("id") Long userId, @Valid @RequestBody UserDto dto) throws CreatingException, IncorrectParameterException, NotFoundParameterException {
+    public UserDto update(@PathVariable("id") Long userId, @Valid @RequestBody UserDto dto) throws
+            IncorrectParameterException, NotFoundParameterException {
         return UserMapper.toUserDto(userService.update(userId, dto));
     }
 

@@ -27,6 +27,6 @@ public interface ItemService {
 
     List<ItemResponseDto> search(String text);
 
-    CommentResponseDto create(Long userId, Long itemId, CommentDto commentDto)
+    CommentResponseDto createComment(Long userId, Long itemId, CommentDto commentDto)
             throws IncorrectParameterException, NotFoundParameterException;
 }

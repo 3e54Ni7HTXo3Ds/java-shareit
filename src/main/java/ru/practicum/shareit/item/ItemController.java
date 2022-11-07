@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.error.exceptions.*;
+import ru.practicum.shareit.error.exceptions.AuthException;
+import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
+import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
+import ru.practicum.shareit.error.exceptions.UpdateException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -51,7 +54,8 @@ public class ItemController {
     public ItemResponseDto update(@PathVariable("id") Long itemId,
                                   @RequestBody ItemDto itemDto,
                                   @RequestHeader("X-Sharer-User-Id") Long userId)
-            throws CreatingException, AuthException, NotFoundParameterException, IncorrectParameterException,
+            throws
+            AuthException, NotFoundParameterException, IncorrectParameterException,
             UpdateException {
         userService.auth(userId);
         return itemService.update(itemId, userId, itemDto);
@@ -77,7 +81,7 @@ public class ItemController {
                                      @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
-        return itemService.create(userId, itemId, commentDto);
+        return itemService.createComment(userId, itemId, commentDto);
     }
 
 

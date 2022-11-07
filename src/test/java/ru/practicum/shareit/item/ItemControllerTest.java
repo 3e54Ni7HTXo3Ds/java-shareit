@@ -188,7 +188,7 @@ public class ItemControllerTest {
 
     @Test
     void commentItems() throws Exception {
-        when(itemService.create(anyLong(), anyLong(), any()))
+        when(itemService.createComment(anyLong(), anyLong(), any()))
                 .thenReturn(commentResponseDto);
 
         mockMvc.perform(post("/items/{id}/comment", item.getId())

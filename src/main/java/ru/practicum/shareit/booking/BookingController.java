@@ -6,7 +6,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.error.exceptions.*;
+import ru.practicum.shareit.error.exceptions.AuthException;
+import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
+import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
+import ru.practicum.shareit.error.exceptions.UpdateException;
 import ru.practicum.shareit.user.UserService;
 
 import java.util.List;
@@ -33,7 +36,7 @@ public class BookingController {
     @PatchMapping("/{id}") //Может быть выполнено только владельцем вещи.
     public BookingResponseDto update(@PathVariable("id") Long bookingId,
                                      @RequestParam Boolean approved,
-                                     @RequestHeader("X-Sharer-User-Id") Long userId) throws CreatingException,
+                                     @RequestHeader("X-Sharer-User-Id") Long userId) throws
             AuthException, NotFoundParameterException, IncorrectParameterException, UpdateException {
         userService.auth(userId);
         return bookingService.update(bookingId, userId, approved);
