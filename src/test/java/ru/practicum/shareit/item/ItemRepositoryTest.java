@@ -26,10 +26,8 @@ public class ItemRepositoryTest {
     private Item item2;
     private Item item3;
 
-
     @BeforeEach
     void setUp() {
-
         user1 = new User(1L, "John", "john.doe@mail.com");
         user2 = new User(2L, "Sam", "1@1.com");
         item1 = new Item(

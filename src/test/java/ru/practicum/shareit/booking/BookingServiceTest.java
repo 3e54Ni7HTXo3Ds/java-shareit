@@ -38,7 +38,6 @@ public class BookingServiceTest {
     @Mock
     private ItemService itemService;
 
-
     private BookingServiceImpl bookingServiceImpl;
     private User user1;
     private User user2;
@@ -220,9 +219,7 @@ public class BookingServiceTest {
         assertEquals("Бронирование не найдено", exception2.getMessage());
         assertEquals("Нельзя изменить после подтверждения", exception3.getMessage());
         assertEquals("Нельзя изменить после подтверждения", exception4.getMessage());
-
     }
-
 
     @Test
     void findById() throws NotFoundParameterException {
@@ -296,8 +293,6 @@ public class BookingServiceTest {
 
         assertEquals("Неверные параметры", exception2.getMessage());
         assertEquals("Unknown state: " + state, exception3.getMessage());
-
-
     }
 
 
