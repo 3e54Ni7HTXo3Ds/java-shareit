@@ -48,7 +48,6 @@ public class ItemServiceTest {
     private Booking booking1;
 
     private ItemDto itemDto1;
-    private ItemDto itemDto2;
     private Comment comment;
     private CommentDto commentDto;
     private ItemResponseDto itemResponseDto;
@@ -89,7 +88,7 @@ public class ItemServiceTest {
         );
         itemResponseDto = ItemMapper.toItemResponseDto(item1);
         itemDto1 = ItemMapper.toItemDto(item1);
-        itemDto2 = ItemMapper.toItemDto(item2);
+        ItemDto itemDto2 = ItemMapper.toItemDto(item2);
 
         comment = new Comment(1L, "Comment", item1, user1,
                 LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
@@ -207,7 +206,6 @@ public class ItemServiceTest {
         //Assert
         verify(itemRepository, Mockito.times(1)).deleteById(item1.getId());
 
-
     }
 
     @Test
@@ -234,13 +232,21 @@ public class ItemServiceTest {
     void createComment()
             throws IncorrectParameterException {
         when(itemRepository.existsById(1L)).thenReturn(true);
+        when(itemRepository.existsById(2L)).thenReturn(false);
         when(itemRepository.findById(item1.getId())).thenReturn(Optional.ofNullable(item1));
         when(userRepository.findById(item1.getId())).thenReturn(Optional.ofNullable(user1));
-        when(bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(eq(user1), any())).thenReturn(List.of(booking1));
+        when(bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(eq(user1), any())).thenReturn(
+                List.of(booking1));
         CommentResponseDto commentResponseDto = CommentMapper.toCommentResponseDto(comment);
 
-
         var result = itemServiceImpl.createComment(user1.getId(), item1.getId(), commentDto);
+
+        final IncorrectParameterException exception1 = assertThrows(IncorrectParameterException.class,
+                () -> itemServiceImpl.createComment(user1.getId(), item1.getId(), new CommentDto("")));
+
+        final IncorrectParameterException exception2 = assertThrows(IncorrectParameterException.class,
+                () -> itemServiceImpl.createComment(user1.getId(), item2.getId(), new CommentDto("comment")));
+
         LocalDateTime time = result.getCreated().truncatedTo(ChronoUnit.SECONDS);
         result.setCreated(time);
         result.setId(1L);
@@ -248,6 +254,18 @@ public class ItemServiceTest {
 
         assertNotNull(result);
         assertEquals((commentResponseDto), result);
+        assertEquals("Неверный комментарий", exception1.getMessage());
+        assertEquals("Неверные параметры вещи", exception2.getMessage());
+    }
+
+    @Test
+    void addLastNextBooking() {
+        when(bookingRepository.findByItemIdOrderByStartAsc(any())).thenReturn(List.of(booking1));
+
+        var result = itemServiceImpl.addLastNextBooking(item1.getId(),user2.getId(),itemResponseDto);
+
+        assertNotNull(result);
+        assertEquals((itemResponseDto), result);
     }
 
 }

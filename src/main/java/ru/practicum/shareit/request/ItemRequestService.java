@@ -5,14 +5,14 @@ import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface ItemRequestService {
 
-    Collection<ItemRequestResponseDto> findAll(Long userId) throws NotFoundParameterException,
+    List<ItemRequestResponseDto> findAll(Long userId) throws NotFoundParameterException,
             IncorrectParameterException;
 
-    Collection<ItemRequestResponseDto> findAllPageble(Long userId, Integer from, Integer size)
+    List<ItemRequestResponseDto> findAllPageble(Long userId, Integer from, Integer size)
             throws NotFoundParameterException,
             IncorrectParameterException;
 

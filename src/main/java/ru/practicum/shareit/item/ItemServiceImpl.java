@@ -64,7 +64,7 @@ public class ItemServiceImpl implements ItemService {
         throw new NotFoundParameterException("Некорректный ID");
     }
 
-    private ItemResponseDto addLastNextBooking(Long itemId, Long userId, ItemResponseDto itemResponseDto) {
+    ItemResponseDto addLastNextBooking(Long itemId, Long userId, ItemResponseDto itemResponseDto) {
         if (Objects.equals(itemResponseDto.getOwnerId(), userId)) {
             List<Booking> list = bookingRepository.findByItemIdOrderByStartAsc(itemId);
             if (list != null && list.size() > 0) {
