@@ -3,6 +3,7 @@ package ru.practicum.shareit.request;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,6 +27,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -65,6 +67,7 @@ public class ItemRequestControllerTest {
         itemRequest = new ItemRequest(
                 1L, "Desc", user1, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         );
+        itemRequestDto = new ItemRequestDto("Desc");
         itemRequestResponseDto = ItemRequestMapper.toItemRequestResponseDto(itemRequest);
         userDto = UserMapper.toUserDto(user1);
     }
@@ -76,7 +79,7 @@ public class ItemRequestControllerTest {
 
         mockMvc.perform(post("/requests")
                         .header("X-Sharer-User-Id", userDto.getId())
-                        .content(mapper.writeValueAsString(itemRequest))
+                        .content(mapper.writeValueAsString(itemRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -85,6 +88,7 @@ public class ItemRequestControllerTest {
                 .andExpect(jsonPath("$.description", is(itemRequestResponseDto.getDescription()), String.class))
                 .andExpect(jsonPath("$.requestor.id", is(itemRequestResponseDto.getRequestor().getId()), Long.class))
                 .andExpect(jsonPath("$.created", is(itemRequestResponseDto.getCreated().toString()), String.class));
+        verify(itemRequestService, Mockito.times(1)).create(userDto.getId(), itemRequestDto);
 
     }
 
@@ -95,7 +99,7 @@ public class ItemRequestControllerTest {
 
         mockMvc.perform(get("/requests")
                         .header("X-Sharer-User-Id", userDto.getId())
-                        .content(mapper.writeValueAsString(itemRequest))
+                        .content(mapper.writeValueAsString(itemRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -105,6 +109,7 @@ public class ItemRequestControllerTest {
                 .andExpect(jsonPath("$[0].description", is(itemRequestResponseDto.getDescription()), String.class))
                 .andExpect(jsonPath("$[0].requestor.id", is(itemRequestResponseDto.getRequestor().getId()), Long.class))
                 .andExpect(jsonPath("$[0].created", is(itemRequestResponseDto.getCreated().toString()), String.class));
+        verify(itemRequestService, Mockito.times(1)).findAll(userDto.getId());
     }
 
     @Test
@@ -114,7 +119,7 @@ public class ItemRequestControllerTest {
 
         mockMvc.perform(get("/requests/{id}", item.getId())
                         .header("X-Sharer-User-Id", userDto.getId())
-                        .content(mapper.writeValueAsString(itemRequest))
+                        .content(mapper.writeValueAsString(itemRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -123,18 +128,19 @@ public class ItemRequestControllerTest {
                 .andExpect(jsonPath("$.description", is(itemRequestResponseDto.getDescription()), String.class))
                 .andExpect(jsonPath("$.requestor.id", is(itemRequestResponseDto.getRequestor().getId()), Long.class))
                 .andExpect(jsonPath("$.created", is(itemRequestResponseDto.getCreated().toString()), String.class));
+        verify(itemRequestService, Mockito.times(1)).findById(item.getId(), userDto.getId());
     }
 
     @Test
     void getAllItemRequestsPageble() throws Exception {
-        when(itemRequestService.findAllPageble(anyLong(), anyInt(),anyInt()))
+        when(itemRequestService.findAllPageble(anyLong(), anyInt(), anyInt()))
                 .thenReturn((List.of(itemRequestResponseDto)));
 
         mockMvc.perform(get("/requests/all")
                         .header("X-Sharer-User-Id", userDto.getId())
                         .param("from", "1")
                         .param("size", "1")
-                        .content(mapper.writeValueAsString(itemRequest))
+                        .content(mapper.writeValueAsString(itemRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -144,6 +150,7 @@ public class ItemRequestControllerTest {
                 .andExpect(jsonPath("$[0].description", is(itemRequestResponseDto.getDescription()), String.class))
                 .andExpect(jsonPath("$[0].requestor.id", is(itemRequestResponseDto.getRequestor().getId()), Long.class))
                 .andExpect(jsonPath("$[0].created", is(itemRequestResponseDto.getCreated().toString()), String.class));
+        verify(itemRequestService, Mockito.times(1)).findAllPageble(userDto.getId(),1,1);
     }
 
 }

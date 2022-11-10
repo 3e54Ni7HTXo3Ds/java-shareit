@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -27,6 +28,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -78,7 +80,7 @@ public class ItemControllerTest {
 
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", userDto.getId())
-                        .content(mapper.writeValueAsString(item))
+                        .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -89,6 +91,7 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.available", is(itemResponseDto.getAvailable()), Boolean.class))
                 .andExpect(jsonPath("$.ownerId", is(itemResponseDto.getOwnerId()), Long.class))
                 .andExpect(jsonPath("$.requestId", is(itemResponseDto.getRequestId()), Long.class));
+        verify(itemService, Mockito.times(1)).create(userDto.getId(), itemDto);
     }
 
     @Test
@@ -110,6 +113,7 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$[0].available", is(itemResponseDto.getAvailable()), Boolean.class))
                 .andExpect(jsonPath("$[0].ownerId", is(itemResponseDto.getOwnerId()), Long.class))
                 .andExpect(jsonPath("$[0].requestId", is(itemResponseDto.getRequestId()), Long.class));
+        verify(itemService, Mockito.times(1)).findAll(userDto.getId());
     }
 
     @Test
@@ -119,7 +123,7 @@ public class ItemControllerTest {
 
         mockMvc.perform(get("/items/{id}", item.getId())
                         .header("X-Sharer-User-Id", userDto.getId())
-                        .content(mapper.writeValueAsString(item))
+                        .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -131,6 +135,7 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.available", is(itemResponseDto.getAvailable()), Boolean.class))
                 .andExpect(jsonPath("$.ownerId", is(itemResponseDto.getOwnerId()), Long.class))
                 .andExpect(jsonPath("$.requestId", is(itemResponseDto.getRequestId()), Long.class));
+        verify(itemService, Mockito.times(1)).findById(item.getId(), userDto.getId());
     }
 
 
@@ -141,7 +146,7 @@ public class ItemControllerTest {
 
         mockMvc.perform(patch("/items/{id}", item.getId())
                         .header("X-Sharer-User-Id", userDto.getId())
-                        .content(mapper.writeValueAsString(item))
+                        .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -152,6 +157,7 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.available", is(itemResponseDto.getAvailable()), Boolean.class))
                 .andExpect(jsonPath("$.ownerId", is(itemResponseDto.getOwnerId()), Long.class))
                 .andExpect(jsonPath("$.requestId", is(itemResponseDto.getRequestId()), Long.class));
+        verify(itemService, Mockito.times(1)).update(item.getId(), userDto.getId(), itemDto);
     }
 
     @Test
@@ -162,6 +168,7 @@ public class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+        verify(itemService, Mockito.times(1)).delete(item.getId());
 
     }
 
@@ -185,6 +192,7 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$[0].available", is(itemResponseDto.getAvailable()), Boolean.class))
                 .andExpect(jsonPath("$[0].ownerId", is(itemResponseDto.getOwnerId()), Long.class))
                 .andExpect(jsonPath("$[0].requestId", is(itemResponseDto.getRequestId()), Long.class));
+        verify(itemService, Mockito.times(1)).search("text");
     }
 
     @Test
@@ -203,6 +211,7 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.item", is(commentResponseDto.getItem()), Long.class))
                 .andExpect(jsonPath("$.authorName", is(commentResponseDto.getAuthor()), String.class))
                 .andExpect(jsonPath("$.created", is(commentResponseDto.getCreated().toString()), String.class));
+        verify(itemService, Mockito.times(1)).createComment(item.getId(), userDto.getId(), new CommentDto("Comment"));
 
     }
 }
