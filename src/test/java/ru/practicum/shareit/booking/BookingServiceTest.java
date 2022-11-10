@@ -112,7 +112,6 @@ public class BookingServiceTest {
         // positive
         var result = bookingServiceImpl.create(user1.getId(), bookingDto1);
         result.setId(booking1.getId());
-        Optional<User> optionalUser = userRepository.findById(any());
 
         //exceptions
         bookingDto2.setItemId(null);
@@ -152,18 +151,21 @@ public class BookingServiceTest {
         final IncorrectParameterException exception7 = assertThrows(IncorrectParameterException.class,
                 () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
 
-
         //Владелец не может бронировать
         bookingDto2.setStart(bookingDto1.getStart());
         bookingDto2.setEnd(bookingDto1.getEnd());
-        //    item2.setOwner(user2);
+
         final NotFoundParameterException exception8 = assertThrows(NotFoundParameterException.class,
                 () -> bookingServiceImpl.create(user1.getId(), bookingDto2));
 
         //Assert
         assertNotNull(result);
-        assertTrue(true, String.valueOf(optionalUser.isPresent()));
-        assertEquals(booking1, result);
+        assertEquals(booking1.getId(), result.getId());
+        assertEquals(booking1.getItem(), result.getItem());
+        assertEquals(booking1.getStatus(), result.getStatus());
+        assertEquals(booking1.getStart(), result.getStart());
+        assertEquals(booking1.getEnd(), result.getEnd());
+        assertEquals(booking1.getBooker(), result.getBooker());
         assertEquals("Неверные параметры бронирования", exception1.getMessage());
         assertEquals("Неверные параметры бронирования", exception2.getMessage());
         assertEquals("Неверные параметры бронирования", exception3.getMessage());
