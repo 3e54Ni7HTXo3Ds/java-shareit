@@ -81,14 +81,6 @@ public class ItemServiceImpl implements ItemService {
     public ItemResponseDto create(Long userId, ItemDto itemDto) throws IncorrectParameterException {
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(new User(userId, null, null));
-        if (item.getAvailable() == null
-                || item.getName() == null
-                || item.getDescription() == null
-                || item.getName().isBlank()
-                || item.getDescription().isBlank()) {
-            log.error("Неверные параметры вещи: {} ", item);
-            throw new IncorrectParameterException("Неверные параметры вещи");
-        }
         return ItemMapper.toItemResponseDto(itemRepository.save(item));
     }
 

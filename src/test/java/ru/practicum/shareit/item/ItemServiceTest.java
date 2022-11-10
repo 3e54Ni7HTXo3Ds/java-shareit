@@ -124,11 +124,9 @@ public class ItemServiceTest {
         final NotFoundParameterException exception1 = assertThrows(NotFoundParameterException.class,
                 () -> itemServiceImpl.findById(item1.getId(), user2.getId()));
 
-
         assertNotNull(result);
         assertEquals(itemResponseDto, result);
         assertEquals("Некорректный ID", exception1.getMessage());
-
     }
 
     @Test
@@ -137,34 +135,8 @@ public class ItemServiceTest {
         var result = itemServiceImpl.create(user2.getId(), itemDto1);
         result.setId(1L);
 
-        itemDto1.setAvailable(null);
-        final IncorrectParameterException exception1 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto1));
-        itemDto1.setAvailable(true);
-        itemDto1.setName(null);
-        final IncorrectParameterException exception2 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto1));
-        itemDto1.setName("thing");
-        itemDto1.setDescription(null);
-
-        final IncorrectParameterException exception3 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto1));
-        itemDto1.setDescription("desc");
-        itemDto1.setName(" ");
-        final IncorrectParameterException exception4 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto1));
-        itemDto1.setDescription(" ");
-        itemDto1.setName("thing");
-        final IncorrectParameterException exception5 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.create(user2.getId(), itemDto1));
-
         assertNotNull(result);
         assertEquals(itemResponseDto, result);
-        assertEquals("Неверные параметры вещи", exception1.getMessage());
-        assertEquals("Неверные параметры вещи", exception2.getMessage());
-        assertEquals("Неверные параметры вещи", exception3.getMessage());
-        assertEquals("Неверные параметры вещи", exception4.getMessage());
-        assertEquals("Неверные параметры вещи", exception5.getMessage());
     }
 
     @Test

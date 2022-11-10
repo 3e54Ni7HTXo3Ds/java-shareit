@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +11,6 @@ import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
 import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
@@ -22,7 +20,6 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@Data
 @Slf4j
 @AllArgsConstructor
 @Transactional
@@ -30,7 +27,6 @@ public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
-    private final ItemService itemService;
     private final UserRepository userRepository;
 
     @Override
@@ -42,15 +38,14 @@ public class BookingServiceImpl implements BookingService {
         booking.setBooker(userRepository.findById(userId).get());
         booking.setStatus(Booking.Status.WAITING);
         Long itemId = booking.getItem().getId();
-        if (itemId == null
-                || booking.getStart() == null
-                || booking.getEnd() == null
-                || !itemRepository.existsById(itemId)
-        ) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(new NotFoundParameterException("Неверные параметры бронирования"));
+        if (booking.getStart() == null || booking.getEnd() == null) {
             log.error("Неверные параметры бронирования: {} ", booking);
             throw new NotFoundParameterException("Неверные параметры бронирования");
         }
-        Item item = itemRepository.findById(itemId).get();
+
+
         booking.setItem(item);
         if (!item.getAvailable()) {
             log.error("Вещь недоступна для бронирования: {} ", booking);
@@ -126,15 +121,7 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getByUser(String state, Long userId, Integer from, Integer size)
             throws IncorrectParameterException {
         User user = userRepository.findById(userId).get();
-        OffsetBasedPageRequest pageRequest;
-
-        if ((from >= 0) && (size > 0)) {
-            pageRequest = new OffsetBasedPageRequest(from, size);
-        } else {
-            log.error("Неверные параметры : {} , {} ", from, size);
-            throw new IncorrectParameterException("Неверные параметры");
-        }
-
+        OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(from, size);
         List<BookingResponseDto> list = null;
         try {
             Booking.State var = Booking.State.valueOf(state);
@@ -175,18 +162,13 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getByOwnerUser(String state, Long userId, Integer from, Integer size)
             throws IncorrectParameterException {
         List<BookingResponseDto> list = null;
-        OffsetBasedPageRequest pageRequest;
-        if ((from >= 0) && (size > 0)) {
-            pageRequest = new OffsetBasedPageRequest(from, size);
-        } else {
-            log.error("Неверные параметры : {} , {} ", from, size);
-            throw new IncorrectParameterException("Неверные параметры");
-        }
+        OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(from, size);
         try {
             Booking.State var = Booking.State.valueOf(state);
             switch (var) {
                 case ALL:
-                    list = BookingMapper.mapToBookingResponseDto(bookingRepository.findAllByOwner(userId, pageRequest));
+                    list = BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findAllByOwner(userId, pageRequest));
                     break;
                 case CURRENT:
                     list =

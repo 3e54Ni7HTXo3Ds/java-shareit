@@ -1,7 +1,6 @@
 package ru.practicum.shareit.request;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Data
 @Slf4j
 @AllArgsConstructor
 @Transactional
@@ -39,7 +37,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 item.setItems(ItemMapper.mapToItemResponseDto(itemRepository.findItemByRequestId(item.getId())));
             }
         }
-
         return list;
     }
 

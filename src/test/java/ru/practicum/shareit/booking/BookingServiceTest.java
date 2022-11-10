@@ -54,9 +54,8 @@ public class BookingServiceTest {
     void setUp() {
         bookingRepository = mock(BookingRepository.class);
         itemRepository = mock(ItemRepository.class);
-        itemService = mock(ItemService.class);
         userRepository = mock(UserRepository.class);
-        bookingServiceImpl = new BookingServiceImpl(bookingRepository, itemRepository, itemService, userRepository);
+        bookingServiceImpl = new BookingServiceImpl(bookingRepository, itemRepository, userRepository);
 
         user1 = new User(1L, "John", "john.doe@mail.com");
         user2 = new User(2L, "Sam", "1@1.com");
@@ -276,9 +275,6 @@ public class BookingServiceTest {
         var result5 = bookingServiceImpl.getByUser("WAITING", user1.getId(), 1, 1);
         var result6 = bookingServiceImpl.getByUser("REJECTED", user1.getId(), 1, 1);
 
-        final IncorrectParameterException exception2 = assertThrows(IncorrectParameterException.class,
-                () -> bookingServiceImpl.getByUser("ALL", user1.getId(), -1, -1));
-
         String state = "KEKE";
         final IncorrectParameterException exception3 = assertThrows(IncorrectParameterException.class,
                 () -> bookingServiceImpl.getByUser(state, user1.getId(), 1, 1));
@@ -291,7 +287,6 @@ public class BookingServiceTest {
         assertEquals(List.of(bookingResponseDto), result5);
         assertEquals(List.of(bookingResponseDto), result6);
 
-        assertEquals("Неверные параметры", exception2.getMessage());
         assertEquals("Unknown state: " + state, exception3.getMessage());
     }
 
@@ -315,8 +310,7 @@ public class BookingServiceTest {
         var result5 = bookingServiceImpl.getByOwnerUser("WAITING", user1.getId(), 1, 1);
         var result6 = bookingServiceImpl.getByOwnerUser("REJECTED", user1.getId(), 1, 1);
 
-        final IncorrectParameterException exception2 = assertThrows(IncorrectParameterException.class,
-                () -> bookingServiceImpl.getByOwnerUser("ALL", user1.getId(), -1, -1));
+
 
         String state = "KEKE";
         final IncorrectParameterException exception3 = assertThrows(IncorrectParameterException.class,
@@ -330,7 +324,7 @@ public class BookingServiceTest {
         assertEquals(List.of(bookingResponseDto), result5);
         assertEquals(List.of(bookingResponseDto), result6);
 
-        assertEquals("Неверные параметры", exception2.getMessage());
+
         assertEquals("Unknown state: " + state, exception3.getMessage());
 
     }

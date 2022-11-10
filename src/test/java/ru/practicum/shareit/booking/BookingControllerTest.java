@@ -135,7 +135,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void getBookings() throws Exception {
+    void getBookingsByUser() throws Exception {
         when(bookingService.getByUser(anyString(), anyLong(), anyInt(), anyInt()))
                 .thenReturn(BookingMapper.mapToBookingResponseDto(List.of(booking)));
 
@@ -156,6 +156,17 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].item.id", is(booking.getItem().getId()), Long.class))
                 .andExpect(jsonPath("$[0].booker.id", is(booking.getBooker().getId()), Long.class))
                 .andExpect(jsonPath("$[0].status", is(booking.getStatus().toString()), Booking.Status.class));
+
+        mockMvc.perform(get("/bookings", booking.getId())
+                        .header("X-Sharer-User-Id", userDto.getId())
+                        .param("from", "-1")
+                        .param("size", "-1")
+                        .param("state", "ALL")
+                        .content(mapper.writeValueAsString(booking))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -180,6 +191,17 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].item.id", is(booking.getItem().getId()), Long.class))
                 .andExpect(jsonPath("$[0].booker.id", is(booking.getBooker().getId()), Long.class))
                 .andExpect(jsonPath("$[0].status", is(booking.getStatus().toString()), Booking.Status.class));
+
+        mockMvc.perform(get("/bookings/owner", booking.getId())
+                        .header("X-Sharer-User-Id", userDto.getId())
+                        .param("from", "-1")
+                        .param("size", "-1")
+                        .param("state", "ALL")
+                        .content(mapper.writeValueAsString(booking))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
 
