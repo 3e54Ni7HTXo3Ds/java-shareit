@@ -30,8 +30,8 @@ public class UserControllerTest {
 
     @MockBean
     private UserService userService;
-
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
     @Autowired
     private MockMvc mockMvc;
 
@@ -103,7 +103,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
-        verify(userService, Mockito.times(1)).update(userDto.getId(),userDto);
+        verify(userService, Mockito.times(1)).update(userDto.getId(), userDto);
     }
 
     @Test
@@ -111,7 +111,6 @@ public class UserControllerTest {
         mockMvc.perform(delete("/users/{id}", userDto.getId()))
                 .andExpect(status().isOk());
         verify(userService, Mockito.times(1)).delete(userDto.getId());
-
     }
 }
 

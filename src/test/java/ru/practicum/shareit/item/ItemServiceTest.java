@@ -206,7 +206,7 @@ public class ItemServiceTest {
         when(itemRepository.existsById(1L)).thenReturn(true);
         when(itemRepository.existsById(2L)).thenReturn(false);
         when(itemRepository.findById(item1.getId())).thenReturn(Optional.ofNullable(item1));
-        when(userRepository.findById(item1.getId())).thenReturn(Optional.ofNullable(user1));
+        when(userRepository.findById(user1.getId())).thenReturn(Optional.ofNullable(user1));
         when(bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(eq(user1), any())).thenReturn(
                 List.of(booking1));
         CommentResponseDto commentResponseDto = CommentMapper.toCommentResponseDto(comment);
