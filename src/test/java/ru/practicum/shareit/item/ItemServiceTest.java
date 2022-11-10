@@ -213,9 +213,6 @@ public class ItemServiceTest {
 
         var result = itemServiceImpl.createComment(user1.getId(), item1.getId(), commentDto);
 
-        final IncorrectParameterException exception1 = assertThrows(IncorrectParameterException.class,
-                () -> itemServiceImpl.createComment(user1.getId(), item1.getId(), new CommentDto("")));
-
         final IncorrectParameterException exception2 = assertThrows(IncorrectParameterException.class,
                 () -> itemServiceImpl.createComment(user1.getId(), item2.getId(), new CommentDto("comment")));
 
@@ -223,10 +220,9 @@ public class ItemServiceTest {
         result.setCreated(time);
         result.setId(1L);
 
-
         assertNotNull(result);
         assertEquals((commentResponseDto), result);
-        assertEquals("Неверный комментарий", exception1.getMessage());
+
         assertEquals("Неверные параметры вещи", exception2.getMessage());
     }
 

@@ -16,7 +16,6 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -30,8 +29,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestResponseDto> findAll(Long userId) {
+
+        //    List<ItemRequest> listReq = ;
+
         List<ItemRequestResponseDto> list =
                 ItemRequestMapper.mapToItemRequestResponseDto(itemRequestRepository.findAll());
+
         if (list.size() > 0) {
             for (ItemRequestResponseDto item : list) {
                 item.setItems(ItemMapper.mapToItemResponseDto(itemRepository.findItemByRequestId(item.getId())));
@@ -65,18 +68,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestResponseDto findById(Long itemRequestId, Long userId)
             throws NotFoundParameterException {
-        if (itemRequestId > 0) {
-            Optional<ItemRequest> itemRequest = itemRequestRepository.findById(itemRequestId);
-            if (itemRequest.isPresent()) {
-                ItemRequestResponseDto itemRequestResponseDto =
-                        ItemRequestMapper.toItemRequestResponseDto(itemRequest.get());
-
-                itemRequestResponseDto.setItems(
-                        ItemMapper.mapToItemResponseDto(itemRepository.findItemByRequestId(itemRequestId)));
-                return itemRequestResponseDto;
-            }
-        } else log.error("Некорректный ID: {} ", itemRequestId);
-        throw new NotFoundParameterException("Некорректный ID");
+        ItemRequest itemRequest = itemRequestRepository.findById(itemRequestId).orElseThrow(
+                new NotFoundParameterException("Нет такого реквеста"));
+        ItemRequestResponseDto itemRequestResponseDto =
+                ItemRequestMapper.toItemRequestResponseDto(itemRequest);
+        itemRequestResponseDto.setItems(
+                ItemMapper.mapToItemResponseDto(itemRepository.findItemByRequestId(itemRequestId)));
+        return itemRequestResponseDto;
     }
 
 
@@ -86,11 +84,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto);
         itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setRequestor(new User(userId, null, null));
-        if (itemRequest.getDescription() == null ||
-                itemRequest.getDescription().isBlank()) {
-            log.error("Неверные параметры описания: {} ", itemRequest);
-            throw new IncorrectParameterException("Неверные параметры описания");
-        }
         return ItemRequestMapper.toItemRequestResponseDto(itemRequestRepository.save(itemRequest));
     }
 

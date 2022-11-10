@@ -77,9 +77,9 @@ public class ItemController {
     }
 
     @PostMapping("/{id}/comment")
-    public CommentResponseDto create(@RequestBody CommentDto commentDto,
-                                     @PathVariable("id") Long itemId,
-                                     @RequestHeader("X-Sharer-User-Id") Long userId)
+    public CommentResponseDto create(@Valid @RequestBody CommentDto commentDto,
+                                            @PathVariable("id") Long itemId,
+                                            @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
         return itemService.createComment(userId, itemId, commentDto);

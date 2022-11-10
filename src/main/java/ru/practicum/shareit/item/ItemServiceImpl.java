@@ -120,12 +120,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentResponseDto createComment(Long userId, Long itemId, CommentDto commentDto)
             throws IncorrectParameterException {
-        if (commentDto.getText().isBlank()) {
-            log.error("Неверный комментарий: {} ", commentDto);
-            throw new IncorrectParameterException("Неверный комментарий");
-        }
-        Item item = itemRepository.findById(itemId).orElseThrow(new IncorrectParameterException("Неверные параметры вещи"));
-        User user = userRepository.findById(userId).get();
+        Item item =
+                itemRepository.findById(itemId).orElseThrow(new IncorrectParameterException("Неверные параметры вещи"));
+        User user = userRepository.findById(userId).orElseThrow(new IncorrectParameterException("Неверные параметры " +
+                "пользователя"));
         Comment comment = CommentMapper.toComment(commentDto);
         List<Booking> listOfPastBookings =
                 bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user,

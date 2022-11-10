@@ -136,13 +136,9 @@ public class ItemRequestServiceTest {
         result.setRequestor(itemRequestResponseDto.getRequestor());
         itemRequestResponseDto.setItems(List.of(itemResponseDto));
 
-        final NotFoundParameterException exception1 = assertThrows(NotFoundParameterException.class,
-                () -> itemRequestServiceImpl.findById(-1L, user1.getId()));
-
         assertNotNull(result);
         assertEquals(itemRequestResponseDto, result);
 
-        assertEquals("Некорректный ID", exception1.getMessage());
     }
 
     @Test
@@ -153,13 +149,9 @@ public class ItemRequestServiceTest {
         result.setCreated(result.getCreated().truncatedTo(ChronoUnit.SECONDS));
         result.setRequestor(itemRequestResponseDto.getRequestor());
 
-
-        final IncorrectParameterException exception1 = assertThrows(IncorrectParameterException.class,
-                () -> itemRequestServiceImpl.create(user1.getId(), new ItemRequestDto("")));
-
         assertNotNull(result);
         assertEquals(itemRequestResponseDto, result);
-        assertEquals("Неверные параметры описания", exception1.getMessage());
+
     }
 
 

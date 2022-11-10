@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
@@ -188,12 +189,11 @@ public class ItemControllerTest {
 
     @Test
     void commentItems() throws Exception {
-        when(itemService.createComment(anyLong(), anyLong(), any()))
-                .thenReturn(commentResponseDto);
+        when(itemService.createComment(anyLong(), anyLong(), any())).thenReturn(commentResponseDto);
 
         mockMvc.perform(post("/items/{id}/comment", item.getId())
                         .header("X-Sharer-User-Id", userDto.getId())
-                        .content(mapper.writeValueAsString(item))
+                        .content(mapper.writeValueAsString(new CommentDto("Comment")))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
