@@ -10,7 +10,6 @@ import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
 import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserRepository;
@@ -35,8 +34,7 @@ public class BookingServiceTest {
     private BookingRepository bookingRepository;
     @Mock
     private ItemRepository itemRepository;
-    @Mock
-    private ItemService itemService;
+
 
     private BookingServiceImpl bookingServiceImpl;
     private User user1;
@@ -48,7 +46,6 @@ public class BookingServiceTest {
     private BookingDto bookingDto1;
     private BookingDto bookingDto2;
     private BookingResponseDto bookingResponseDto;
-    private UserDto userDto;
 
     @BeforeEach
     void setUp() {
@@ -91,7 +88,7 @@ public class BookingServiceTest {
                 user2,
                 Booking.Status.WAITING);
 
-        userDto = UserMapper.toUserDto(user1);
+        UserDto userDto = UserMapper.toUserDto(user1);
         bookingDto1 = BookingMapper.toBookingDto(booking1);
         bookingDto2 = BookingMapper.toBookingDto(booking2);
         bookingResponseDto = BookingMapper.toBookingResponseDto(booking1);
@@ -118,15 +115,7 @@ public class BookingServiceTest {
         final NotFoundParameterException exception1 = assertThrows(NotFoundParameterException.class,
                 () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
         bookingDto2.setItemId(item2.getId());
-        bookingDto2.setStart(null);
-        final NotFoundParameterException exception2 = assertThrows(NotFoundParameterException.class,
-                () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
-        bookingDto2.setStart(bookingDto1.getStart());
-        bookingDto2.setEnd(null);
-        final NotFoundParameterException exception3 = assertThrows(NotFoundParameterException.class,
-                () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
 
-        bookingDto2.setEnd(bookingDto1.getEnd());
         bookingDto2.setItemId(2L);
         final IncorrectParameterException exception4 = assertThrows(IncorrectParameterException.class,
                 () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
@@ -167,8 +156,6 @@ public class BookingServiceTest {
         assertEquals(booking1.getEnd(), result.getEnd());
         assertEquals(booking1.getBooker(), result.getBooker());
         assertEquals("Неверные параметры бронирования", exception1.getMessage());
-        assertEquals("Неверные параметры бронирования", exception2.getMessage());
-        assertEquals("Неверные параметры бронирования", exception3.getMessage());
         assertEquals("Вещь недоступна для бронирования", exception4.getMessage());
         assertEquals("Неверное время бронирования", exception5.getMessage());
         assertEquals("Неверное время бронирования", exception6.getMessage());
@@ -260,7 +247,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void getByUser() throws IncorrectParameterException {
+    void getByUser() throws IncorrectParameterException, NotFoundParameterException {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
         when(userRepository.findById(2L)).thenReturn(Optional.of(user2));
         when(bookingRepository.findByBookerOrderByStartDesc(any(), any())).thenReturn(List.of(booking1));

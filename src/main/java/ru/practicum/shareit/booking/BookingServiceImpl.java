@@ -35,17 +35,12 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = BookingMapper.toBooking(bookingDto);
         LocalDateTime start = booking.getStart();
         LocalDateTime end = booking.getEnd();
-        booking.setBooker(userRepository.findById(userId).get());
+        booking.setBooker(userRepository.findById(userId).orElseThrow(new NotFoundParameterException("Некорректный " +
+                "ID")));
         booking.setStatus(Booking.Status.WAITING);
         Long itemId = booking.getItem().getId();
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(new NotFoundParameterException("Неверные параметры бронирования"));
-        if (booking.getStart() == null || booking.getEnd() == null) {
-            log.error("Неверные параметры бронирования: {} ", booking);
-            throw new NotFoundParameterException("Неверные параметры бронирования");
-        }
-
-
         booking.setItem(item);
         if (!item.getAvailable()) {
             log.error("Вещь недоступна для бронирования: {} ", booking);
@@ -67,27 +62,20 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto update(Long bookingId, Long userId, Boolean approved) throws UpdateException,
             NotFoundParameterException, IncorrectParameterException {
-        if (!bookingRepository.existsById(bookingId)) {
-            log.error("Бронирование не найдено: {} ", bookingId);
-            throw new UpdateException("Бронирование не найдено");
-        }
-        Item item = bookingRepository.findById(bookingId).get().getItem();
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(new UpdateException("Бронирование не найдено"));
+        Item item = booking.getItem();
         if (!Objects.equals(userId, item.getOwner().getId())) {
             log.error("Подтверждать может только создатель: {} ", bookingId);
             throw new NotFoundParameterException("Подтверждать может только создатель");
         }
-        Booking booking = bookingRepository.findById(bookingId).get();
+        if (booking.getStatus() == Booking.Status.APPROVED) {
+            log.error("Нельзя изменить после подтверждения: {} ", bookingId);
+            throw new IncorrectParameterException("Нельзя изменить после подтверждения");
+        }
         if (approved) {
-            if (booking.getStatus() == Booking.Status.APPROVED) {
-                log.error("Нельзя изменить после подтверждения: {} ", bookingId);
-                throw new IncorrectParameterException("Нельзя изменить после подтверждения");
-            }
             booking.setStatus(Booking.Status.APPROVED);
         } else {
-            if (booking.getStatus() == Booking.Status.APPROVED) {
-                log.error("Нельзя изменить после подтверждения: {} ", bookingId);
-                throw new IncorrectParameterException("Нельзя изменить после подтверждения");
-            }
             booking.setStatus(Booking.Status.REJECTED);
         }
         bookingRepository.save(booking);
@@ -98,29 +86,28 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto findById(Long bookingId, Long userId) throws NotFoundParameterException {
-        if (bookingId > 0 && bookingRepository.findById(bookingId).isPresent()) {
-            Booking booking = bookingRepository.findById(bookingId).get();
-            Item item = itemRepository.findById(booking.getItem().getId()).get();
-            if (!(Objects.equals(booking.getBooker().getId(), userId) ||
-                    Objects.equals(item.getOwner().getId(), userId))) {
-                log.error("Получение данных о конкретном бронировании " +
-                        " может быть выполнено либо автором бронирования, либо владельцем вещи," +
-                        " к которой относится бронирование: {} ", bookingId);
-                throw new NotFoundParameterException("Получение данных о конкретном бронировании" +
-                        " может быть выполнено либо автором бронирования, " +
-                        "либо владельцем вещи, к которой относится бронирование");
-            }
-            BookingResponseDto responseDto = BookingMapper.toBookingResponseDto(booking);
-            responseDto.getItem().setName(item.getName());
-            return responseDto;
-        } else log.error("Некорректный ID: {} ", bookingId);
-        throw new NotFoundParameterException("Некорректный ID");
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(new NotFoundParameterException("Некорректный ID"));
+        Item item = itemRepository.findById(booking.getItem().getId())
+                .orElseThrow(new NotFoundParameterException("Некорректный ID"));
+        if (!(Objects.equals(booking.getBooker().getId(), userId) ||
+                Objects.equals(item.getOwner().getId(), userId))) {
+            log.error("Получение данных о конкретном бронировании " +
+                    " может быть выполнено либо автором бронирования, либо владельцем вещи," +
+                    " к которой относится бронирование: {} ", bookingId);
+            throw new NotFoundParameterException("Получение данных о конкретном бронировании" +
+                    " может быть выполнено либо автором бронирования, " +
+                    "либо владельцем вещи, к которой относится бронирование");
+        }
+        BookingResponseDto responseDto = BookingMapper.toBookingResponseDto(booking);
+        responseDto.getItem().setName(item.getName());
+        return responseDto;
     }
 
     @Override
     public List<BookingResponseDto> getByUser(String state, Long userId, Integer from, Integer size)
-            throws IncorrectParameterException {
-        User user = userRepository.findById(userId).get();
+            throws IncorrectParameterException, NotFoundParameterException {
+        User user = userRepository.findById(userId).orElseThrow(new NotFoundParameterException("Некорректный ID"));
         OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(from, size);
         List<BookingResponseDto> list = null;
         try {
@@ -131,10 +118,9 @@ public class BookingServiceImpl implements BookingService {
                             bookingRepository.findByBookerOrderByStartDesc(user, pageRequest));
                     break;
                 case CURRENT:
-                    list =
-                            BookingMapper.mapToBookingResponseDto(
-                                    bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
-                                            user, LocalDateTime.now(), LocalDateTime.now()));
+                    list = BookingMapper.mapToBookingResponseDto(
+                            bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                                    user, LocalDateTime.now(), LocalDateTime.now()));
                     break;
                 case PAST:
                     list = BookingMapper.mapToBookingResponseDto(

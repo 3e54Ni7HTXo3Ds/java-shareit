@@ -12,6 +12,7 @@ import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
 import ru.practicum.shareit.user.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 
@@ -26,7 +27,7 @@ public class BookingController {
     private final UserService userService;
 
     @PostMapping //Запрос может быть создан любым пользователем, а затем подтверждён владельцем вещи.
-    public BookingResponseDto create(@RequestBody BookingDto bookingDto,
+    public BookingResponseDto create(@Valid @RequestBody BookingDto bookingDto,
                                      @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
