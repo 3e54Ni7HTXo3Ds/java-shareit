@@ -90,7 +90,7 @@ public class ItemRequestServiceTest {
     void findAll() {
 
         when(itemRepository.findItemByRequestId(any())).thenReturn(List.of(item1));
-        when(itemRepository.findByRequestIdIn(any())).thenReturn(List.of(item1,item2));
+        when(itemRepository.findByRequestIdIn(any())).thenReturn(List.of(item1, item2));
         when(itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(any())).thenReturn(List.of(itemRequest));
 
         var result = itemRequestServiceImpl.findAll(user1.getId());
@@ -103,9 +103,9 @@ public class ItemRequestServiceTest {
 
 
     @Test
-    void findAllPageble(){
+    void findAllPageble() {
 
-        when(itemRepository.findByRequestIdIn(any())).thenReturn(List.of(item1,item2));
+        when(itemRepository.findByRequestIdIn(any())).thenReturn(List.of(item1, item2));
         when(itemRequestRepository.findByRequestorIdNotOrderByCreatedDesc(any(), any())).thenReturn(
                 new PageImpl<>(List.of(itemRequest)));
 
