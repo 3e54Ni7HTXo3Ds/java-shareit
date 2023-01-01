@@ -9,13 +9,16 @@ import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -30,38 +33,48 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestResponseDto> findAll(Long userId) {
 
-        //    List<ItemRequest> listReq = ;
+        List<ItemRequestResponseDto> list = ItemRequestMapper.mapToItemRequestResponseDto(
+                itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(userId));
 
-        List<ItemRequestResponseDto> list =
-                ItemRequestMapper.mapToItemRequestResponseDto(itemRequestRepository.findAll());
+        return getItemRequestResponseDtos(list);
+    }
+
+    private List<ItemRequestResponseDto> getItemRequestResponseDtos(List<ItemRequestResponseDto> list) {
+        List<Long> requestIds = new ArrayList<>();
+        List<Item> items = new ArrayList<>();
+        List<Item> requestsItems = new ArrayList<>();
 
         if (list.size() > 0) {
-            for (ItemRequestResponseDto item : list) {
-                item.setItems(ItemMapper.mapToItemResponseDto(itemRepository.findItemByRequestId(item.getId())));
+            for (ItemRequestResponseDto itemRequestResponseDto : list) {
+                requestIds.add(itemRequestResponseDto.getId());
+            }
+            items = itemRepository.findByRequestIdIn(requestIds);
+        }
+
+        if (items.size() > 0) {
+            for (ItemRequestResponseDto itemRequestResponseDto : list) { //берем весь список реквестов
+                for (Item item : items) {                                  // берем весь список вещей полученный из базы
+                    if (Objects.equals(item.getRequestId(), itemRequestResponseDto.getId())) {
+                        requestsItems.add(item); // если в списке вещей присутствуют вещи с таким  RequestId -
+                        // добавляем в отдельный список
+                    }
+                }
+                itemRequestResponseDto.setItems(ItemMapper.mapToItemResponseDto(requestsItems)); //устанавливаем к
+                // запросу список вещей которые добавили другие пользователи
+                requestsItems.clear();
             }
         }
         return list;
     }
 
     @Override
-    public List<ItemRequestResponseDto> findAllPageble(Long userId, Integer from, Integer size)
-            throws IncorrectParameterException {
-        if (from == null || size == null) {
-            return ItemRequestMapper.mapToItemRequestResponseDto(itemRequestRepository.findAll());
-        }
-        if (from < 0 || size <= 0) {
-            log.error("Неверные параметры : {} , {} ", from, size);
-            throw new IncorrectParameterException("Неверные параметры");
-        }
+    public List<ItemRequestResponseDto> findAllPageble(Long userId, Integer from, Integer size) {
         PageRequest pageRequest = PageRequest.of(from, size);
+
         List<ItemRequestResponseDto> list = ItemRequestMapper.mapToItemRequestResponseDto(
-                itemRequestRepository.findByRequestorIdNot(userId, pageRequest));
-        if (list.size() > 0) {
-            for (ItemRequestResponseDto item : list) {
-                item.setItems(ItemMapper.mapToItemResponseDto(itemRepository.findItemByRequestId(item.getId())));
-            }
-        }
-        return list;
+                itemRequestRepository.findByRequestorIdNotOrderByCreatedDesc(userId, pageRequest));
+
+        return getItemRequestResponseDtos(list);
     }
 
 
@@ -86,6 +99,4 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         itemRequest.setRequestor(new User(userId, null, null));
         return ItemRequestMapper.toItemRequestResponseDto(itemRequestRepository.save(itemRequest));
     }
-
-
 }

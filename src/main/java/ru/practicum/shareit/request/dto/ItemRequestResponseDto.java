@@ -21,6 +21,6 @@ public class ItemRequestResponseDto {
     private String description;// — текст запроса, содержащий описание требуемой вещи;
     private UserResponseDto requestor;// — пользователь, создавший запрос;
     private LocalDateTime created;// — дата и время создания запроса.
-    private List<ItemResponseDto> items;
+    private List<ItemResponseDto> items; //список ответов id вещи, название, id владельца
 
 }

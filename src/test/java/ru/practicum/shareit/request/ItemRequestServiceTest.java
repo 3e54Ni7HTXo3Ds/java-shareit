@@ -23,7 +23,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -63,7 +64,7 @@ public class ItemRequestServiceTest {
                 "Внеземные технологии",
                 true,
                 user2,
-                null
+                1L
         );
         item2 = new Item(
                 2L,
@@ -89,7 +90,8 @@ public class ItemRequestServiceTest {
     void findAll() {
 
         when(itemRepository.findItemByRequestId(any())).thenReturn(List.of(item1));
-        when(itemRequestRepository.findAll()).thenReturn(List.of(itemRequest));
+        when(itemRepository.findByRequestIdIn(any())).thenReturn(List.of(item1,item2));
+        when(itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(any())).thenReturn(List.of(itemRequest));
 
         var result = itemRequestServiceImpl.findAll(user1.getId());
         itemRequestResponseDto.setItems(List.of(itemResponseDto));
@@ -101,28 +103,19 @@ public class ItemRequestServiceTest {
 
 
     @Test
-    void findAllPageble()
-            throws IncorrectParameterException {
+    void findAllPageble(){
 
-        when(itemRequestRepository.findAll()).thenReturn(List.of(itemRequest));
-        when(itemRepository.findItemByRequestId(any())).thenReturn(List.of(item1));
-        when(itemRequestRepository.findByRequestorIdNot(any(), any())).thenReturn(new PageImpl<>(List.of(itemRequest)));
+        when(itemRepository.findByRequestIdIn(any())).thenReturn(List.of(item1,item2));
+        when(itemRequestRepository.findByRequestorIdNotOrderByCreatedDesc(any(), any())).thenReturn(
+                new PageImpl<>(List.of(itemRequest)));
 
         var result = itemRequestServiceImpl.findAllPageble(itemRequest.getId(), 1, 1);
-
-        final IncorrectParameterException exception1 = assertThrows(IncorrectParameterException.class,
-                () -> itemRequestServiceImpl.findAllPageble(itemRequest.getId(), -1, 1));
-
-        final IncorrectParameterException exception2 = assertThrows(IncorrectParameterException.class,
-                () -> itemRequestServiceImpl.findAllPageble(itemRequest.getId(), 1, -1));
 
         itemRequestResponseDto.setItems(List.of(itemResponseDto));
         itemRequestResponseDto.setRequestor(result.get(0).getRequestor());
 
         assertNotNull(result);
         assertEquals(List.of(itemRequestResponseDto), result);
-        assertEquals("Неверные параметры", exception1.getMessage());
-        assertEquals("Неверные параметры", exception2.getMessage());
     }
 
     @Test

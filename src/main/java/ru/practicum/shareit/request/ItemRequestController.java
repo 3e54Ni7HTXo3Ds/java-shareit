@@ -56,7 +56,16 @@ public class ItemRequestController {
             @RequestParam(required = false, defaultValue = "0") Integer from,
             @RequestParam(required = false, defaultValue = "10") Integer size
     ) throws AuthException, NotFoundParameterException, IncorrectParameterException {
+        checkParams(from, size);
         userService.auth(userId);
         return itemRequestService.findAllPageble(userId, from, size);
+    }
+
+
+    private void checkParams(Integer from, Integer size) throws IncorrectParameterException {
+        if ((from < 0) && (size <= 0)) {
+            log.error("Неверные параметры : {} , {} ", from, size);
+            throw new IncorrectParameterException("Неверные параметры");
+        }
     }
 }
