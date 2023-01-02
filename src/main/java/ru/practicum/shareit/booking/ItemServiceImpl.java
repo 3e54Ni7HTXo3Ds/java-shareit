@@ -19,11 +19,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-@Service
+@Service ("IS")
 @Slf4j
 @AllArgsConstructor
 @Transactional
-public class BookingServiceImpl implements BookingService {
+public class ItemServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
@@ -154,7 +154,7 @@ public class BookingServiceImpl implements BookingService {
             switch (var) {
                 case ALL:
                     list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findAllByOwner(userId, pageRequest));
+                            bookingRepository.findAllByOwnerPageble(userId, pageRequest));
                     break;
                 case CURRENT:
                     list =

@@ -33,7 +33,7 @@ public class BookingServiceTest {
     @Mock
     private ItemRepository itemRepository;
 
-    private BookingServiceImpl bookingServiceImpl;
+    private ItemServiceImpl bookingServiceImpl;
     private User user1;
     private User user2;
     private Booking booking1;
@@ -49,7 +49,7 @@ public class BookingServiceTest {
         bookingRepository = mock(BookingRepository.class);
         itemRepository = mock(ItemRepository.class);
         userRepository = mock(UserRepository.class);
-        bookingServiceImpl = new BookingServiceImpl(bookingRepository, itemRepository, userRepository);
+        bookingServiceImpl = new ItemServiceImpl(bookingRepository, itemRepository, userRepository);
 
         user1 = new User(1L, "John", "john.doe@mail.com");
         user2 = new User(2L, "Sam", "1@1.com");
@@ -290,7 +290,7 @@ public class BookingServiceTest {
     @Test
     void getByOwnerUserPositive() throws IncorrectParameterException {
 
-        when(bookingRepository.findAllByOwner(any(), any())).thenReturn(List.of(booking1));
+        when(bookingRepository.findAllByOwnerPageble(any(), any())).thenReturn(List.of(booking1));
         when(bookingRepository.findCurrentByOwner(any(), any())).thenReturn(List.of(booking1));
         when(bookingRepository.findPastByOwner(any(), any())).thenReturn(List.of(booking1));
         when(bookingRepository.findFutureByOwner(any(), any())).thenReturn(List.of(booking1));

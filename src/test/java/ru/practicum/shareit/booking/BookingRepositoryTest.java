@@ -29,7 +29,6 @@ public class BookingRepositoryTest {
     @Autowired
     private BookingRepository bookingRepository;
 
-
     private Item item1;
     private Item item2;
     private Item item3;
@@ -41,10 +40,13 @@ public class BookingRepositoryTest {
     private Booking booking5;
     private Booking booking6;
 
+    private User user1;
+    private User user2;
+
     @BeforeEach
     void setUp() {
-        User user1 = new User(1L, "John", "john.doe@mail.com");
-        User user2 = new User(2L, "Sam", "1@1.com");
+        user1 = new User(1L, "John", "john.doe@mail.com");
+        user2 = new User(2L, "Sam", "1@1.com");
         item1 = new Item(
                 1L,
                 "Ионный двигатель",
@@ -72,11 +74,16 @@ public class BookingRepositoryTest {
 
         booking1 = new Booking(1L, LocalDateTime.now().plusMinutes(10), LocalDateTime.now().plusMinutes(30), item1,
                 user1, Booking.Status.WAITING);
-        booking2 = new Booking(2L, LocalDateTime.now().plusMinutes(10), LocalDateTime.now().plusMinutes(30), item2,
+        booking2 = new Booking(2L, LocalDateTime.now().minusMinutes(30), LocalDateTime.now().minusMinutes(10), item2,
                 user2, Booking.Status.REJECTED);
-        booking3 = new Booking(3L, LocalDateTime.now().plusMinutes(10), LocalDateTime.now().plusMinutes(30), item3,
+        booking3 = new Booking(3L, LocalDateTime.now().minusMinutes(60), LocalDateTime.now().plusMinutes(30), item3,
                 user2, Booking.Status.APPROVED);
+        booking4 = new Booking(4L, LocalDateTime.now().minusMinutes(120), LocalDateTime.now().minusMinutes(10), item2,
+                user2, Booking.Status.WAITING);
 
+        userRepository.deleteAll();
+        itemRepository.deleteAll();
+        bookingRepository.deleteAll();
         userRepository.save(user1);
         userRepository.save(user2);
         itemRepository.save(item1);
@@ -85,14 +92,55 @@ public class BookingRepositoryTest {
         bookingRepository.save(booking1);
         bookingRepository.save(booking2);
         bookingRepository.save(booking3);
+        bookingRepository.save(booking4);
     }
 
+    @Test
+    void findAllByOwnerPageble() {
+        OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(0, 10);
+        var result = bookingRepository.findAllByOwnerPageble(1L, pageRequest);
+        assertNotNull(result);
+        assertEquals(result.size(),3);
+        assertEquals((booking2).getId(), result.get(0).getId());
+        assertEquals((booking3).getId(), result.get(1).getId());
+        assertEquals((booking4).getId(), result.get(2).getId());
+
+
+    }
     @Test
     void findWaitingByOwner() {
         var result = bookingRepository.findWaitingByOwner(2L);
         assertNotNull(result);
         assertEquals((booking1).getId(), result.get(0).getId());
         assertEquals(List.of(booking1).get(0).getBooker().getId(), result.get(0).getBooker().getId());
+    }
+    @Test
+    void findRejectedByOwner() {
+        var result = bookingRepository.findRejectedByOwner(1L);
+        assertNotNull(result);
+        assertEquals((booking2).getId(), result.get(0).getId());
+        assertEquals(List.of(booking2).get(0).getBooker().getId(), result.get(0).getBooker().getId());
+    }
+    @Test
+    void findFutureByOwner() {
+        var result = bookingRepository.findFutureByOwner(2L, LocalDateTime.now());
+        assertNotNull(result);
+        assertEquals((booking1).getId(), result.get(0).getId());
+        assertEquals(List.of(booking1).get(0).getBooker().getId(), result.get(0).getBooker().getId());
+    }
+    @Test
+    void findPastByOwner() {
+        var result = bookingRepository.findPastByOwner(1L, LocalDateTime.now());
+        assertNotNull(result);
+        assertEquals((booking4).getId(), result.get(0).getId());
+        assertEquals(List.of(booking4).get(0).getBooker().getId(), result.get(0).getBooker().getId());
+    }
+    @Test
+    void findCurrentByOwner() {
+        var result = bookingRepository.findCurrentByOwner(1L, LocalDateTime.now());
+        assertNotNull(result);
+        assertEquals((booking3).getId(), result.get(0).getId());
+        assertEquals(List.of(booking3).get(0).getBooker().getId(), result.get(0).getBooker().getId());
     }
 
 
