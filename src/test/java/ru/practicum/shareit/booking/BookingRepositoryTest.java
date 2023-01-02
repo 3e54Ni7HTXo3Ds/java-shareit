@@ -100,13 +100,14 @@ public class BookingRepositoryTest {
         OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(0, 10);
         var result = bookingRepository.findAllByOwnerPageble(1L, pageRequest);
         assertNotNull(result);
-        assertEquals(result.size(),3);
+        assertEquals(result.size(), 3);
         assertEquals((booking2).getId(), result.get(0).getId());
         assertEquals((booking3).getId(), result.get(1).getId());
         assertEquals((booking4).getId(), result.get(2).getId());
 
 
     }
+
     @Test
     void findWaitingByOwner() {
         var result = bookingRepository.findWaitingByOwner(2L);
@@ -114,6 +115,7 @@ public class BookingRepositoryTest {
         assertEquals((booking1).getId(), result.get(0).getId());
         assertEquals(List.of(booking1).get(0).getBooker().getId(), result.get(0).getBooker().getId());
     }
+
     @Test
     void findRejectedByOwner() {
         var result = bookingRepository.findRejectedByOwner(1L);
@@ -121,6 +123,7 @@ public class BookingRepositoryTest {
         assertEquals((booking2).getId(), result.get(0).getId());
         assertEquals(List.of(booking2).get(0).getBooker().getId(), result.get(0).getBooker().getId());
     }
+
     @Test
     void findFutureByOwner() {
         var result = bookingRepository.findFutureByOwner(2L, LocalDateTime.now());
@@ -128,6 +131,7 @@ public class BookingRepositoryTest {
         assertEquals((booking1).getId(), result.get(0).getId());
         assertEquals(List.of(booking1).get(0).getBooker().getId(), result.get(0).getBooker().getId());
     }
+
     @Test
     void findPastByOwner() {
         var result = bookingRepository.findPastByOwner(1L, LocalDateTime.now());
@@ -135,6 +139,7 @@ public class BookingRepositoryTest {
         assertEquals((booking4).getId(), result.get(0).getId());
         assertEquals(List.of(booking4).get(0).getBooker().getId(), result.get(0).getBooker().getId());
     }
+
     @Test
     void findCurrentByOwner() {
         var result = bookingRepository.findCurrentByOwner(1L, LocalDateTime.now());
