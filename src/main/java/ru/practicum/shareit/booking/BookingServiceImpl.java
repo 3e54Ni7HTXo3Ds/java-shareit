@@ -23,7 +23,7 @@ import java.util.Objects;
 @Slf4j
 @AllArgsConstructor
 @Transactional
-public class ItemServiceImpl implements BookingService {
+public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;

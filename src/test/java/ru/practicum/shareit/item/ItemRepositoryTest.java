@@ -40,20 +40,21 @@ public class ItemRepositoryTest {
         );
         item2 = new Item(
                 2L,
-                "не Тансформатор1 кииборг",
+                "не Трансформатор1 кииборг",
                 "земные теХнологии",
                 false,
                 user1,
                 null
         );
         item3 = new Item(
-                2L,
+                3L,
                 "плазменный трансформатор",
                 "марсианские изыскания",
                 false,
                 user1,
                 null
         );
+
         userRepository.save(user1);
         userRepository.save(user2);
         itemRepository.save(item1);
@@ -64,11 +65,9 @@ public class ItemRepositoryTest {
 
     @Test
     void searchDesc() {
-
         var result = itemRepository.search("технологии");
-
         assertNotNull(result);
-        assertTrue(true, String.valueOf((result.size() == 2)));
+        assertEquals(2, result.size());
         assertTrue(true, String.valueOf((result.containsAll(List.of(item1, item2)))));
         assertFalse(false, String.valueOf((result.contains((item3)))));
     }
@@ -77,8 +76,8 @@ public class ItemRepositoryTest {
     void searchName() {
         var result = itemRepository.search("трансформатор");
         assertNotNull(result);
-        assertTrue(true, String.valueOf((result.size() == 2)));
-        assertTrue(true, String.valueOf((result.containsAll(List.of(item2, item3)))));
+        assertEquals(2, result.size());
+        assertTrue(true, String.valueOf(result.containsAll(List.of(item2, item3))));
         assertFalse(false, String.valueOf((result.contains((item1)))));
     }
 
@@ -86,6 +85,6 @@ public class ItemRepositoryTest {
     void searchNegative() {
         var result = itemRepository.search("киборг");
         assertNotNull(result);
-        assertTrue(true, String.valueOf((result.size() == 0)));
+        assertEquals(0, result.size());
     }
 }

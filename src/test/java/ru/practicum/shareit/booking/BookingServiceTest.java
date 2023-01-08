@@ -33,7 +33,7 @@ public class BookingServiceTest {
     @Mock
     private ItemRepository itemRepository;
 
-    private ItemServiceImpl bookingServiceImpl;
+    private BookingServiceImpl bookingServiceImpl;
     private User user1;
     private User user2;
     private Booking booking1;
@@ -49,7 +49,7 @@ public class BookingServiceTest {
         bookingRepository = mock(BookingRepository.class);
         itemRepository = mock(ItemRepository.class);
         userRepository = mock(UserRepository.class);
-        bookingServiceImpl = new ItemServiceImpl(bookingRepository, itemRepository, userRepository);
+        bookingServiceImpl = new BookingServiceImpl(bookingRepository, itemRepository, userRepository);
 
         user1 = new User(1L, "John", "john.doe@mail.com");
         user2 = new User(2L, "Sam", "1@1.com");
