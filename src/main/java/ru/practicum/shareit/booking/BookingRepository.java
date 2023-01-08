@@ -10,7 +10,8 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findByBookerOrderByStartDesc(User booker); //all
+    List<Booking> findByBookerOrderByStartDesc(User booker,
+                                               OffsetBasedPageRequest pageRequest); //all
 
     List<Booking> findByBookerAndStartIsAfterOrderByStartDesc(User booker, LocalDateTime now); //future
 
@@ -23,11 +24,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByBookerAndEndIsBeforeOrderByStartDesc(User booker, LocalDateTime now);
 
-    @Query(" select b from Booking b " +
+    @Query("select b from Booking b " +
             "join Item i on b.item.id=i.id " +
-            "where i.owner.id =  ?1 and b.status<>'REJECTED'" +
-            "order by b.start desc ")
-    List<Booking> findAllByOwner(Long userId);
+            "where i.owner.id =  ?1 " +
+            "order by b.start desc")
+    List<Booking> findAllByOwnerPageble(Long userId, OffsetBasedPageRequest pageRequest);
 
     @Query(" select b from Booking b " +
             "join Item i on b.item.id=i.id " +
@@ -49,7 +50,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query(" select b from Booking b " +
             "join Item i on b.item.id=i.id " +
-            "where i.owner.id =  ?1 and b.start<?2 and b.status<>'REJECTED'" +
+            "where i.owner.id =  ?1 and b.end<?2 and b.status<>'REJECTED'" +
             "order by b.start desc ")
     List<Booking> findPastByOwner(Long userId, LocalDateTime now);
 

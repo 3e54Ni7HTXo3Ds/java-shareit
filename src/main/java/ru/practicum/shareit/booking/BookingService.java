@@ -8,7 +8,6 @@ import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.error.exceptions.UpdateException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface BookingService {
     Booking create(Long userId, BookingDto bookingDto) throws IncorrectParameterException, NotFoundParameterException;
@@ -18,10 +17,9 @@ public interface BookingService {
 
     BookingResponseDto findById(Long bookingId, Long userId) throws NotFoundParameterException;
 
-    Optional<Booking> findById(Long bookingId) throws NotFoundParameterException;
-
-    List<BookingResponseDto> getByUser(String state, Long userId)
+    List<BookingResponseDto> getByUser(String state, Long userId, Integer from, Integer size)
             throws IncorrectParameterException, NotFoundParameterException;
 
-    List<BookingResponseDto> getByOwnerUser(String state, Long userId) throws IncorrectParameterException;
+    List<BookingResponseDto> getByOwnerUser(String state, Long userId, Integer from, Integer size)
+            throws IncorrectParameterException;
 }

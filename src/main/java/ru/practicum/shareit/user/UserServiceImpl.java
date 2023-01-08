@@ -2,17 +2,15 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.error.exceptions.AuthException;
-import ru.practicum.shareit.error.exceptions.CreatingException;
 import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -23,12 +21,11 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final ConversionService conversionService;
 
     @Override
-    public Collection<UserDto> findAll() {
+    public List<UserDto> findAll() {
         return userRepository.findAll().stream()
-                .map(user -> conversionService.convert(user, UserDto.class))
+                .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
@@ -43,7 +40,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User create(UserDto userDto) throws CreatingException, IncorrectParameterException {
+    public User create(UserDto userDto) throws
+            IncorrectParameterException {
         User user = UserMapper.toUser(userDto);
         String email = user.getEmail();
         if (email == null || email.isBlank()) {
@@ -55,7 +53,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(Long userId, UserDto userDto)
-            throws CreatingException, IncorrectParameterException, NotFoundParameterException {
+            throws
+            IncorrectParameterException, NotFoundParameterException {
         User userNew = UserMapper.toUser(userDto);
         User user = userRepository.findById(userId).get();
         if (userNew.getEmail() != null) {
@@ -71,8 +70,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(Long userId) {
         if (userId > 0) {
-            log.info("Удаляем пользователя: {} ", userId);
-            userRepository.deleteById(userId);
+            if (userRepository.existsById(userId)) {
+                log.info("Удаляем пользователя: {} ", userId);
+                userRepository.deleteById(userId);
+            } else {
+                log.info("Нет пользователя: {} ", userId);
+            }
         } else log.error("Некорректный ID: {} ", userId);
     }
 
