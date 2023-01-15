@@ -20,13 +20,13 @@ services:
     depends_on:
       - db
     environment:
-      - DB_NAME=shareit
+      - DB_NAME=share
       - DB_HOST=db
       - DB_PORT=5432
       - SERVER_PORT=9090
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/share
 
   db:
     image: postgres:latest
