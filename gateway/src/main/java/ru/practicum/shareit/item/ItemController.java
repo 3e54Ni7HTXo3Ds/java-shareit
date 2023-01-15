@@ -58,7 +58,6 @@ public class ItemController {
         return itemClient.search(text, userId);
     }
 
-
     @PostMapping("/{id}/comment")
     public ResponseEntity<Object> create(@Valid @RequestBody CommentDto commentDto,
                                          @PathVariable("id") Long itemId,

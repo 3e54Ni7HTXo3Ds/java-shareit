@@ -25,31 +25,31 @@ public class ItemClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> createItem(Long userId, ItemDto itemDto) {
+    public ResponseEntity<Object> createItem(long userId, ItemDto itemDto) {
         return post("", userId, itemDto);
     }
 
-    public ResponseEntity<Object> updateItem(Long itemId, Long userId, ItemDto itemDto) {
+    public ResponseEntity<Object> updateItem(long itemId, long userId, ItemDto itemDto) {
         return patch("/" + itemId, userId, itemDto);
     }
 
-    public ResponseEntity<Object> deleteItem(Long itemId, Long userId) {
+    public ResponseEntity<Object> deleteItem(long itemId, long userId) {
         return delete("/" + itemId, userId);
     }
 
-    public ResponseEntity<Object> findAllItem(Long userId) {
+    public ResponseEntity<Object> findAllItem(long userId) {
         return get("/", userId);
     }
 
-    public ResponseEntity<Object> findByItemId(Long itemId, Long userId) {
+    public ResponseEntity<Object> findByItemId(long itemId, long userId) {
         return get("/" + itemId, userId);
     }
 
-    public ResponseEntity<Object> search(String text, Long userId) {
+    public ResponseEntity<Object> search(String text, long userId) {
         return get("/search?text=" + text, userId);
     }
 
-    public ResponseEntity<Object> createComment(Long itemId, Long userId, CommentDto commentDto) {
+    public ResponseEntity<Object> createComment(long userId, long itemId, CommentDto commentDto) {
         return post("/" + itemId + "/comment", userId, commentDto);
     }
 }
