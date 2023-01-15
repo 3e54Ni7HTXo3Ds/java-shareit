@@ -14,7 +14,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.user.UserService;
 
-import javax.validation.Valid;
 import java.util.Collection;
 
 
@@ -29,7 +28,9 @@ public class ItemController {
     private final UserService userService;
 
     @PostMapping
-    public ItemResponseDto create(@Valid @RequestBody ItemDto itemDto,
+    public ItemResponseDto create(
+         //   @Valid
+            @RequestBody ItemDto itemDto,
                                   @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException {
         userService.auth(userId);
@@ -77,7 +78,9 @@ public class ItemController {
     }
 
     @PostMapping("/{id}/comment")
-    public CommentResponseDto create(@Valid @RequestBody CommentDto commentDto,
+    public CommentResponseDto create(
+           // @Valid
+            @RequestBody CommentDto commentDto,
                                             @PathVariable("id") Long itemId,
                                             @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {

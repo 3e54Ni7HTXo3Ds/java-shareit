@@ -8,7 +8,6 @@ import ru.practicum.shareit.error.exceptions.IncorrectParameterException;
 import ru.practicum.shareit.error.exceptions.NotFoundParameterException;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import javax.validation.Valid;
 import java.util.Collection;
 
 
@@ -32,13 +31,17 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto create(@Valid @RequestBody UserDto userDto) throws
+    public UserDto create(
+        //    @Valid
+            @RequestBody UserDto userDto) throws
             IncorrectParameterException {
         return UserMapper.toUserDto(userService.create(userDto));
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@PathVariable("id") Long userId, @Valid @RequestBody UserDto dto) throws
+    public UserDto update(@PathVariable("id") Long userId,
+                       //   @Valid
+                          @RequestBody UserDto dto) throws
             IncorrectParameterException, NotFoundParameterException {
         return UserMapper.toUserDto(userService.update(userId, dto));
     }
