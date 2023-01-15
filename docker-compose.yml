@@ -29,7 +29,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/share
 
   db:
-    image: postgres:latest
+    image: postgres
     #  container_name:
 
     ports:
