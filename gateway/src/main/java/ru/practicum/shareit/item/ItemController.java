@@ -29,9 +29,9 @@ public class ItemController {
     public ResponseEntity<Object> update(@PathVariable("id") Long itemId,
                                          @RequestBody ItemDto itemDto,
                                          @RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.info("Updating itemId {}, userId={}, itemDto={}", itemId, userId, itemDto);
         return itemClient.updateItem(itemId, userId, itemDto);
     }
-
 
     @GetMapping
     public ResponseEntity<Object> findAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
