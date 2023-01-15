@@ -1,14 +1,18 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.model;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "requests")
@@ -22,6 +26,10 @@ public class ItemRequest {
     @ManyToOne
     @JoinColumn(name = "requestor_id")
     private User requestor;// — пользователь, создавший запрос;
-    @Transient
+    @Column(name = "request_createdate")
     private LocalDateTime created;// — дата и время создания запроса.
+
+    public ItemRequest(String description) {
+        this.description = description;
+    }
 }
