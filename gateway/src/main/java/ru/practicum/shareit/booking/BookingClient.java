@@ -60,7 +60,8 @@ public class BookingClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        return get("?state={state}&from={from}&size={size}", userId, parameters);}
+        return get("?state={state}&from={from}&size={size}", userId, parameters);
+    }
 
     public ResponseEntity<Object> getByOwnerUser(long userId, BookingState state, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of(
@@ -68,7 +69,8 @@ public class BookingClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        return get("/owner?state={state}&from={from}&size={size}", userId, parameters);}
+        return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
+    }
 
     public ResponseEntity<Object> findByBookingId(long bookingId, long userId) {
         return get("/" + bookingId, userId);
