@@ -24,7 +24,7 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - SERVER_PORT=9090
-      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_USERNAME=share
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/share
 
@@ -43,6 +43,6 @@ services:
     # переменные окружения
     environment:
       - POSTGRES_DB=share
-      - POSTGRES_USER=root
+      - POSTGRES_USER=share
       - POSTGRES_PASSWORD=root
 
