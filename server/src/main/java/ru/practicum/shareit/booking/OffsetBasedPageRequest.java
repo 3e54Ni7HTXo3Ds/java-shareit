@@ -14,12 +14,6 @@ public class OffsetBasedPageRequest implements Pageable, Serializable {
     private final Sort sort;
 
     public OffsetBasedPageRequest(int offset, int limit, Sort sort) {
-        if (offset < 0) {
-            throw new IllegalArgumentException("Offset index must not be less than zero!");
-        }
-        if (limit < 1) {
-            throw new IllegalArgumentException("Limit must not be less than one!");
-        }
         this.limit = limit;
         this.offset = offset;
         this.sort = sort;
@@ -70,7 +64,8 @@ public class OffsetBasedPageRequest implements Pageable, Serializable {
     }
 
     public OffsetBasedPageRequest previous() {
-        return hasPrevious() ? new OffsetBasedPageRequest((int) (getOffset() - getPageSize()), getPageSize(), getSort()) : this;
+        return hasPrevious() ? new OffsetBasedPageRequest((int) (getOffset() - getPageSize()), getPageSize(),
+                getSort()) : this;
     }
 
 

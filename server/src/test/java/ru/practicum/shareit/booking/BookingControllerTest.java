@@ -163,17 +163,6 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].booker.id", is(booking.getBooker().getId()), Long.class))
                 .andExpect(jsonPath("$[0].status", is(booking.getStatus().toString()), Booking.Status.class));
         verify(bookingService, Mockito.times(1)).getByUser("ALL", userDto.getId(), 1, 1);
-
-        mockMvc.perform(get("/bookings", booking.getId())
-                        .header("X-Sharer-User-Id", userDto.getId())
-                        .param("from", "-1")
-                        .param("size", "-1")
-                        .param("state", "ALL")
-                        .content(mapper.writeValueAsString(booking))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -199,19 +188,6 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].booker.id", is(booking.getBooker().getId()), Long.class))
                 .andExpect(jsonPath("$[0].status", is(booking.getStatus().toString()), Booking.Status.class));
         verify(bookingService, Mockito.times(1)).getByOwnerUser("ALL", userDto.getId(), 1, 1);
-
-        mockMvc.perform(get("/bookings/owner", booking.getId())
-                        .header("X-Sharer-User-Id", userDto.getId())
-                        .param("from", "-1")
-                        .param("size", "-1")
-                        .param("state", "ALL")
-                        .content(mapper.writeValueAsString(booking))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
     }
-
-
 }
 

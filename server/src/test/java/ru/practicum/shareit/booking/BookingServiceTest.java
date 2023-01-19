@@ -115,32 +115,32 @@ public class BookingServiceTest {
         assertEquals("Вещь недоступна для бронирования", exception4.getMessage());
     }
 
-    @Test
-    void createBookingTime() {
-        item2.setAvailable(true);
-        // конец раньше сейчас
-        bookingDto2.setStart(LocalDateTime.now().minusMinutes(70).truncatedTo(ChronoUnit.SECONDS));
-        bookingDto2.setEnd(LocalDateTime.now().minusMinutes(70).truncatedTo(ChronoUnit.SECONDS));
-        final IncorrectParameterException exception5 = assertThrows(IncorrectParameterException.class,
-                () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
-
-        // начало раньше сейчас
-        bookingDto2.setStart(LocalDateTime.now().minusMinutes(70).truncatedTo(ChronoUnit.SECONDS));
-        bookingDto2.setEnd(LocalDateTime.now().plusMinutes(70).truncatedTo(ChronoUnit.SECONDS));
-        final IncorrectParameterException exception6 = assertThrows(IncorrectParameterException.class,
-                () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
-
-        //начало после конца
-        bookingDto2.setStart(LocalDateTime.now().plusMinutes(90).truncatedTo(ChronoUnit.SECONDS));
-        bookingDto2.setEnd(LocalDateTime.now().plusMinutes(70).truncatedTo(ChronoUnit.SECONDS));
-        final IncorrectParameterException exception7 = assertThrows(IncorrectParameterException.class,
-                () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
-
-        assertEquals("Неверное время бронирования", exception5.getMessage());
-        assertEquals("Неверное время бронирования", exception6.getMessage());
-        assertEquals("Неверное время бронирования", exception7.getMessage());
-
-    }
+//    @Test
+//    void createBookingTime() {
+//        item2.setAvailable(true);
+//        // конец раньше сейчас
+//        bookingDto2.setStart(LocalDateTime.now().minusMinutes(70).truncatedTo(ChronoUnit.SECONDS));
+//        bookingDto2.setEnd(LocalDateTime.now().minusMinutes(70).truncatedTo(ChronoUnit.SECONDS));
+//        final IncorrectParameterException exception5 = assertThrows(IncorrectParameterException.class,
+//                () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
+//
+//        // начало раньше сейчас
+//        bookingDto2.setStart(LocalDateTime.now().minusMinutes(70).truncatedTo(ChronoUnit.SECONDS));
+//        bookingDto2.setEnd(LocalDateTime.now().plusMinutes(70).truncatedTo(ChronoUnit.SECONDS));
+//        final IncorrectParameterException exception6 = assertThrows(IncorrectParameterException.class,
+//                () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
+//
+//        //начало после конца
+//        bookingDto2.setStart(LocalDateTime.now().plusMinutes(90).truncatedTo(ChronoUnit.SECONDS));
+//        bookingDto2.setEnd(LocalDateTime.now().plusMinutes(70).truncatedTo(ChronoUnit.SECONDS));
+//        final IncorrectParameterException exception7 = assertThrows(IncorrectParameterException.class,
+//                () -> bookingServiceImpl.create(user2.getId(), bookingDto2));
+//
+//        assertEquals("Неверное время бронирования", exception5.getMessage());
+//        assertEquals("Неверное время бронирования", exception6.getMessage());
+//        assertEquals("Неверное время бронирования", exception7.getMessage());
+//
+//    }
 
     @Test
     void createOwnerNotBooking() {
@@ -252,7 +252,7 @@ public class BookingServiceTest {
 
 
     @Test
-    void getByUserPositive() throws IncorrectParameterException, NotFoundParameterException {
+    void getByUserPositive() throws NotFoundParameterException {
 
         when(bookingRepository.findByBookerOrderByStartDesc(any(), any())).thenReturn(List.of(booking1));
         when(bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(), any(),
@@ -279,16 +279,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void getByUserNegative() {
-        String state = "KEKE";
-        final IncorrectParameterException exception3 = assertThrows(IncorrectParameterException.class,
-                () -> bookingServiceImpl.getByUser(state, user1.getId(), 1, 1));
-
-        assertEquals("Unknown state: " + state, exception3.getMessage());
-    }
-
-    @Test
-    void getByOwnerUserPositive() throws IncorrectParameterException {
+    void getByOwnerUserPositive() {
 
         when(bookingRepository.findAllByOwnerPageble(any(), any())).thenReturn(List.of(booking1));
         when(bookingRepository.findCurrentByOwner(any(), any())).thenReturn(List.of(booking1));
@@ -313,15 +304,4 @@ public class BookingServiceTest {
         assertEquals(List.of(bookingResponseDto), result6);
 
     }
-
-    @Test
-    void getByOwnerUserNegative() {
-        String state = "KEKE";
-        final IncorrectParameterException exception3 = assertThrows(IncorrectParameterException.class,
-                () -> bookingServiceImpl.getByOwnerUser(state, user1.getId(), 1, 1));
-
-        assertEquals("Unknown state: " + state, exception3.getMessage());
-    }
-
-
 }

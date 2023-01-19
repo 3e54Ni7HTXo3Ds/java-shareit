@@ -27,9 +27,8 @@ public class BookingController {
 
     @PostMapping //Запрос может быть создан любым пользователем, а затем подтверждён владельцем вещи.
     public BookingResponseDto create(
-         //   @Valid
             @RequestBody BookingDto bookingDto,
-                                     @RequestHeader("X-Sharer-User-Id") Long userId)
+            @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
         userService.auth(userId);
         return BookingMapper.toBookingResponseDto(bookingService.create(userId, bookingDto));
@@ -58,7 +57,6 @@ public class BookingController {
                                               @RequestParam(required = false, defaultValue = "10") Integer size,
                                               @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException, NotFoundParameterException {
-        checkParams(from, size);
         userService.auth(userId);
         return bookingService.getByUser(state, userId, from, size);
     }
@@ -69,15 +67,7 @@ public class BookingController {
                                                    @RequestParam(required = false, defaultValue = "10") Integer size,
                                                    @RequestHeader("X-Sharer-User-Id") Long userId)
             throws AuthException, IncorrectParameterException {
-        checkParams(from, size);
         userService.auth(userId);
         return bookingService.getByOwnerUser(state, userId, from, size);
-    }
-
-    private void checkParams(Integer from, Integer size) throws IncorrectParameterException {
-        if ((from < 0) && (size <= 0)) {
-            log.error("Неверные параметры : {} , {} ", from, size);
-            throw new IncorrectParameterException("Неверные параметры");
-        }
     }
 }

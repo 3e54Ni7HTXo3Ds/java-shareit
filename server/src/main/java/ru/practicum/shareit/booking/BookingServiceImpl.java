@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-@Service ("IS")
+@Service("IS")
 @Slf4j
 @AllArgsConstructor
 @Transactional
@@ -33,8 +33,6 @@ public class BookingServiceImpl implements BookingService {
     public Booking create(Long userId, BookingDto bookingDto) throws IncorrectParameterException,
             NotFoundParameterException {
         Booking booking = BookingMapper.toBooking(bookingDto);
-        LocalDateTime start = booking.getStart();
-        LocalDateTime end = booking.getEnd();
         booking.setBooker(userRepository.findById(userId).orElseThrow(new NotFoundParameterException("Некорректный " +
                 "ID")));
         booking.setStatus(Booking.Status.WAITING);
@@ -45,12 +43,6 @@ public class BookingServiceImpl implements BookingService {
         if (!item.getAvailable()) {
             log.error("Вещь недоступна для бронирования: {} ", booking);
             throw new IncorrectParameterException("Вещь недоступна для бронирования");
-        }
-        if (end.isBefore(LocalDateTime.now())
-                || start.isBefore(LocalDateTime.now())
-                || start.isAfter(end)) {
-            log.error("Неверное время бронирования: {} ", booking);
-            throw new IncorrectParameterException("Неверное время бронирования");
         }
         if (Objects.equals(item.getOwner().getId(), booking.getBooker().getId())) {
             log.error("Владелец не может бронировать: {} ", booking);
@@ -106,79 +98,70 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseDto> getByUser(String state, Long userId, Integer from, Integer size)
-            throws IncorrectParameterException, NotFoundParameterException {
+            throws NotFoundParameterException {
         User user = userRepository.findById(userId).orElseThrow(new NotFoundParameterException("Некорректный ID"));
         OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(from, size);
         List<BookingResponseDto> list = null;
-        try {
-            Booking.State var = Booking.State.valueOf(state);
-            switch (var) {
-                case ALL:
-                    list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerOrderByStartDesc(user, pageRequest));
-                    break;
-                case CURRENT:
-                    list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
-                                    user, LocalDateTime.now(), LocalDateTime.now()));
-                    break;
-                case PAST:
-                    list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user, LocalDateTime.now()));
-                    break;
-                case FUTURE:
-                    list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(user, LocalDateTime.now()));
-                    break;
-                case WAITING:
-                case REJECTED:
-                    list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findByBookerAndStatusOrderByStartDesc(user,
-                                    Booking.Status.valueOf(state)));
-                    break;
-            }
-        } catch (IllegalArgumentException e) {
-            throw new IncorrectParameterException("Unknown state: " + state);
+        Booking.State var = Booking.State.valueOf(state);
+        switch (var) {
+            case ALL:
+                list = BookingMapper.mapToBookingResponseDto(
+                        bookingRepository.findByBookerOrderByStartDesc(user, pageRequest));
+                break;
+            case CURRENT:
+                list = BookingMapper.mapToBookingResponseDto(
+                        bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                                user, LocalDateTime.now(), LocalDateTime.now()));
+                break;
+            case PAST:
+                list = BookingMapper.mapToBookingResponseDto(
+                        bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user, LocalDateTime.now()));
+                break;
+            case FUTURE:
+                list = BookingMapper.mapToBookingResponseDto(
+                        bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(user, LocalDateTime.now()));
+                break;
+            case WAITING:
+            case REJECTED:
+                list = BookingMapper.mapToBookingResponseDto(
+                        bookingRepository.findByBookerAndStatusOrderByStartDesc(user,
+                                Booking.Status.valueOf(state)));
+                break;
         }
         return list;
     }
 
 
     @Override
-    public List<BookingResponseDto> getByOwnerUser(String state, Long userId, Integer from, Integer size)
-            throws IncorrectParameterException {
+    public List<BookingResponseDto> getByOwnerUser(String state, Long userId, Integer from, Integer size) {
         List<BookingResponseDto> list = null;
         OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(from, size);
-        try {
-            Booking.State var = Booking.State.valueOf(state);
-            switch (var) {
-                case ALL:
-                    list = BookingMapper.mapToBookingResponseDto(
-                            bookingRepository.findAllByOwnerPageble(userId, pageRequest));
-                    break;
-                case CURRENT:
-                    list =
-                            BookingMapper.mapToBookingResponseDto(bookingRepository.findCurrentByOwner(userId,
-                                    LocalDateTime.now()));
-                    break;
-                case PAST:
-                    list = BookingMapper.mapToBookingResponseDto(bookingRepository.findPastByOwner(userId,
-                            LocalDateTime.now()));
-                    break;
-                case FUTURE:
-                    list = BookingMapper.mapToBookingResponseDto(bookingRepository.findFutureByOwner(userId,
-                            LocalDateTime.now()));
-                    break;
-                case WAITING:
+        Booking.State var = Booking.State.valueOf(state);
+        switch (var) {
+            case ALL:
+                list = BookingMapper.mapToBookingResponseDto(
+                        bookingRepository.findAllByOwnerPageble(userId, pageRequest));
+                break;
+            case CURRENT:
+                list =
+                        BookingMapper.mapToBookingResponseDto(bookingRepository.findCurrentByOwner(userId,
+                                LocalDateTime.now()));
+                break;
+            case PAST:
+                list = BookingMapper.mapToBookingResponseDto(bookingRepository.findPastByOwner(userId,
+                        LocalDateTime.now()));
+                break;
+            case FUTURE:
+                list = BookingMapper.mapToBookingResponseDto(bookingRepository.findFutureByOwner(userId,
+                        LocalDateTime.now()));
+                break;
+            case WAITING:
 
-                    list = BookingMapper.mapToBookingResponseDto(bookingRepository.findWaitingByOwner(userId));
-                    break;
-                case REJECTED:
-                    list = BookingMapper.mapToBookingResponseDto(bookingRepository.findRejectedByOwner(userId));
-                    break;
-            }
-        } catch (IllegalArgumentException e) {
-            throw new IncorrectParameterException("Unknown state: " + state);
+                list = BookingMapper.mapToBookingResponseDto(bookingRepository.findWaitingByOwner(userId));
+                break;
+            case REJECTED:
+                list = BookingMapper.mapToBookingResponseDto(bookingRepository.findRejectedByOwner(userId));
+                break;
         }
         return list;
     }
